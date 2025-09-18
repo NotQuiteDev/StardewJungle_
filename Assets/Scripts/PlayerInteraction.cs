@@ -55,13 +55,13 @@ public class PlayerInteraction : MonoBehaviour
         if (foundInteractable != null && closestInteractable != foundInteractable)
         {
             closestInteractable = foundInteractable;
-            FindObjectOfType<GameUI>()?.ShowInteractionPrompt(closestInteractable.GetInteractionText());
+            //FindObjectOfType<GameUI>()?.ShowInteractionPrompt(closestInteractable.GetInteractionText());
         }
         // 이전에 대상이 있었는데 이제는 아무것도 찾지 못했을 경우
         else if (foundInteractable == null && closestInteractable != null)
         {
             closestInteractable = null;
-            FindObjectOfType<GameUI>()?.HideInteractionPrompt();
+            //FindObjectOfType<GameUI>()?.HideInteractionPrompt();
         }
     }
 
