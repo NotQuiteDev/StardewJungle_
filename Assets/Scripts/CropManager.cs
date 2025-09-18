@@ -34,7 +34,9 @@ public class CropManager : MonoBehaviour
     public float MaxWaterAmount => maxWaterAmount;
     public float GrowthDuration => growthDuration;
     public float GrowthTimer => growthTimer;
+    public float OptimalWaterAmount => optimalWaterAmount;  
 
+    public float MinWaterAmount => minWaterAmount;
     private void Start()
     {
         // 초기화
