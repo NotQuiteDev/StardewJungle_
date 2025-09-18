@@ -1,107 +1,91 @@
 using UnityEngine;
 
-public class CropManager : MonoBehaviour
+// IInteractable 인터페이스를 따른다고 선언
+public class CropManager : MonoBehaviour, IInteractable
 {
-    [Header("성장 설정 (Growth Settings)")]
-    [Tooltip("성장이 완료되는 데 걸리는 총 시간 (초)")]
+    // 작물의 현재 상태를 관리하기 위한 열거형(enum)
+    public enum CropState { Growing, Grown, Dead }
+    public CropState State { get; private set; }
+
+    [Header("오브젝트 연결")]
+    [SerializeField] private Transform cropVisuals;
+
+    [Header("성장 설정")]
     [SerializeField] private float growthDuration = 60f;
-    [Tooltip("심겨졌을 때의 시작 크기")]
     [SerializeField] private Vector3 startScale = new Vector3(0.1f, 0.1f, 0.1f);
-    [Tooltip("성장이 완료되었을 때의 최대 크기")]
     [SerializeField] private Vector3 maxScale = Vector3.one;
 
-    [Header("수분 설정 (Water Settings)")]
-    [Tooltip("작물이 죽는 최소 함수량")]
-    [SerializeField] private float minWaterAmount = 0f;
-    [Tooltip("작물이 죽는 최대 함수량")]
+    [Header("수분 설정")]
+    [SerializeField] private float minWaterAmount = 10f;
     [SerializeField] private float maxWaterAmount = 100f;
-    [Tooltip("매초 잃는 함수량")]
     [SerializeField] private float waterLossPerSecond = 1f;
-
-    [Header("상태 및 점수 (State & Scoring)")]
-    [Tooltip("작물이 죽었을 때 대체될 프리팹")]
-    [SerializeField] private GameObject deadCropPrefab;
-
-    // --- 내부 변수 (Private Variables) ---
+    
+    // --- Public Properties (외부 접근용) ---
     public float CurrentWaterAmount { get; private set; }
     public float CurrentScore { get; private set; }
-    
+    public float MaxWaterAmount => maxWaterAmount;
+    public float MinWaterAmount => minWaterAmount;
+    public float GrowthDuration => growthDuration;
+    public float GrowthTimer => growthTimer;
+    public float OptimalWaterAmount => optimalWaterAmount;
+
+    // --- Private Variables (내부 변수) ---
     private float optimalWaterAmount;
     private float waterRange;
     private float growthTimer;
-    private bool isDead = false;
-    
-    // --- 외부 접근용 프로퍼티 (Public Properties) ---
-    public float MaxWaterAmount => maxWaterAmount;
-    public float GrowthDuration => growthDuration;
-    public float GrowthTimer => growthTimer;
-    public float OptimalWaterAmount => optimalWaterAmount;  
-    public float MinWaterAmount => minWaterAmount;
+    private Renderer[] visualRenderers; // 자식의 모든 렌더러를 저장할 배열
+
+    private void Awake()
+    {
+        if (cropVisuals == null)
+        {
+            Debug.LogError("Crop Visuals가 연결되지 않았습니다!", this.gameObject);
+            State = CropState.Dead; // 에러 시 즉시 죽음 처리
+            return;
+        }
+        // 자식 오브젝트의 모든 렌더러를 미리 찾아 저장 (최적화)
+        visualRenderers = cropVisuals.GetComponentsInChildren<Renderer>();
+    }
 
     private void Start()
     {
-        // 초기화
-        transform.localScale = startScale;
-
-        // 최적 함수량 계산 및 설정
+        State = CropState.Growing;
+        cropVisuals.localScale = startScale;
         optimalWaterAmount = (minWaterAmount + maxWaterAmount) / 2f;
-        waterRange = (maxWaterAmount - minWaterAmount) / 2f; // 점수 계산을 위한 범위
+        waterRange = (maxWaterAmount - minWaterAmount) / 2f;
         CurrentWaterAmount = optimalWaterAmount;
-
-        // ▼▼▼ 변경점: InvokeRepeating 제거 ▼▼▼
-        // 1초마다 호출하는 딱딱한 방식을 사용하지 않습니다.
-        // InvokeRepeating(nameof(UpdatePerSecond), 1f, 1f);
     }
 
     private void Update()
     {
-        if (isDead) return;
+        // 자라는 중일 때만 아래 로직을 실행
+        if (State != CropState.Growing) return;
 
-        // --- 성장 처리 (부드러운 크기 변화) ---
+        // 성장 처리
         if (growthTimer < growthDuration)
         {
             growthTimer += Time.deltaTime;
-            float growthPercent = Mathf.Clamp01(growthTimer / growthDuration);
-            transform.localScale = Vector3.Lerp(startScale, maxScale, growthPercent);
+            cropVisuals.localScale = Vector3.Lerp(startScale, maxScale, growthTimer / growthDuration);
+        }
+        else
+        {
+            // 성장이 완료되면 상태 변경
+            State = CropState.Grown;
         }
 
-        // ▼▼▼ 변경점: UpdatePerSecond의 로직을 Update로 이동 ▼▼▼
-        // Time.deltaTime을 곱해서 매 프레임 부드럽게 값이 변하도록 만듭니다.
-
-        // 1. 수분 감소 (아날로그 방식)
+        // 수분 및 점수 처리
         CurrentWaterAmount -= waterLossPerSecond * Time.deltaTime;
-
-        // 2. 점수 갱신 (아날로그 방식)
         UpdateScore();
-
-        // 3. 죽음 조건 확인
         CheckDeathCondition();
     }
-    
-    // ▼▼▼ 삭제: UpdatePerSecond() 함수는 더 이상 필요 없음 ▼▼▼
-    // private void UpdatePerSecond() { ... }
 
-    /// <summary>
-    /// 현재 수분 상태에 따라 점수를 계산하고 누적합니다.
-    /// </summary>
     private void UpdateScore()
     {
-        // 최적 함수량과의 거리를 계산 (0 ~ 1 사이의 값)
         float distanceFromOptimal = Mathf.Abs(CurrentWaterAmount - optimalWaterAmount) / waterRange;
-        
-        // 거리가 멀수록 점수가 낮아짐 (1 ~ 0 사이의 값)
         float qualityMultiplier = 1f - distanceFromOptimal;
-
-        // 초당 얻는 점수는 품질에 비례 (최소 0점, 최대 1점)
-        float pointsThisSecond = Mathf.Max(0, qualityMultiplier);
-        
-        // ▼▼▼ 변경점: Time.deltaTime을 곱해 점수도 부드럽게 누적 ▼▼▼
-        CurrentScore += pointsThisSecond * Time.deltaTime;
+        CurrentScore += Mathf.Max(0, qualityMultiplier) * Time.deltaTime;
     }
 
-    /// <summary>
-    /// 수분량이 경계를 벗어났는지 확인하고 죽음을 처리합니다.
-    /// </summary>
     private void CheckDeathCondition()
     {
         if (CurrentWaterAmount <= minWaterAmount || CurrentWaterAmount >= maxWaterAmount)
@@ -110,30 +94,58 @@ public class CropManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// 작물에 물을 주는 함수 (외부에서 호출)
-    /// </summary>
     public void WaterCrop(float amount)
     {
-        if (isDead) return;
-        CurrentWaterAmount += amount;
+        // 자라는 중일 때만 물을 줄 수 있음
+        if (State == CropState.Growing)
+        {
+            CurrentWaterAmount += amount;
+        }
     }
 
-    /// <summary>
-    /// 작물을 죽이고 죽은 작물 프리팹으로 교체합니다.
-    /// </summary>
+    // ▼▼▼ 핵심 수정: Die() 함수 ▼▼▼
     private void Die()
     {
-        isDead = true;
-
-        Debug.Log($"작물이 죽었습니다! 최종 점수: {CurrentScore:F2}");
-
-        if (deadCropPrefab != null)
+        State = CropState.Dead;
+        CurrentWaterAmount = 0; // UI 표시를 위해 0으로 설정
+        growthTimer = 0;
+        
+        // 모든 비주얼 파츠의 색상을 검정으로 변경
+        foreach (var rend in visualRenderers)
         {
-            GameObject deadCrop = Instantiate(deadCropPrefab, transform.position, transform.rotation);
-            deadCrop.transform.localScale = transform.localScale; // 현재 크기 유지
+            rend.material.color = Color.black;
         }
+    }
 
-        Destroy(gameObject);
+    // ▼▼▼ 핵심 추가: IInteractable 인터페이스 구현 ▼▼▼
+    public void Interact()
+    {
+        switch (State)
+        {
+            case CropState.Grown:
+                Debug.Log($"작물을 수확했습니다! 최종 점수: {Mathf.FloorToInt(CurrentScore)}점");
+                Destroy(gameObject);
+                break;
+            case CropState.Dead:
+                Debug.Log("죽은 작물을 제거했습니다.");
+                Destroy(gameObject);
+                break;
+            case CropState.Growing:
+                // 자라는 중에는 아무것도 하지 않음
+                break;
+        }
+    }
+
+    public string GetInteractionText()
+    {
+        switch (State)
+        {
+            case CropState.Grown:
+                return "Harvest";
+            case CropState.Dead:
+                return "Clear";
+            default:
+                return "";
+        }
     }
 }
