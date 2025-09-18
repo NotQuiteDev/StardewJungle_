@@ -159,5 +159,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   collisionRadius: 0.2
-  minY: -30
-  maxY: 60
+  minY: -40
+  maxY: 70

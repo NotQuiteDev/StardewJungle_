@@ -30,12 +30,16 @@ public class CropManager : MonoBehaviour
     private float waterRange;
     private float growthTimer;
     private bool isDead = false;
+    
+    public float MaxWaterAmount => maxWaterAmount;
+    public float GrowthDuration => growthDuration;
+    public float GrowthTimer => growthTimer;
 
     private void Start()
     {
         // 초기화
         transform.localScale = startScale;
-        
+
         // 최적 함수량 계산 및 설정
         optimalWaterAmount = (minWaterAmount + maxWaterAmount) / 2f;
         waterRange = (maxWaterAmount - minWaterAmount) / 2f; // 점수 계산을 위한 범위
