@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections.Generic; // Dictionary를 사용하기 위해 추가
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -21,9 +22,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.1f;
     
     [Header("조준 시 투명화 (Aim Transparency)")]
-    [Tooltip("조준 시 캐릭터의 투명도입니다. (0: 완전 투명, 1: 완전 불투명)")]
     [SerializeField] [Range(0f, 1f)] private float transparentAlpha = 0.3f;
-    [Tooltip("투명해지는 속도입니다.")]
     [SerializeField] private float fadeSpeed = 10f;
 
     [Header("지면 판정 (Ground Check)")]
@@ -35,10 +34,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform headCheck;
     [SerializeField] private float headRadius = 0.2f;
 
-    // 내부 변수
+    // --- 내부 변수 ---
     private Rigidbody rb;
-    private float horizontalInput;
-    private float verticalInput;
+    private Vector2 moveInput;
     private Vector3 moveDirection;
     private bool isGrounded;
     private float boostTimeCounter;
@@ -48,31 +46,29 @@ public class PlayerMovement : MonoBehaviour
     private float coyoteTimeCounter;
     private bool isHittingHead;
     private Vector3 velocityRef = Vector3.zero;
-    
-    // ▼▼▼ 수정된 부분: 여러 머티리얼을 관리하기 위한 Dictionary ▼▼▼
     private Dictionary<Material, Color> originalMaterials = new Dictionary<Material, Color>();
-    // ▲▲▲ 수정된 부분 ▲▲▲
     
-    // 외부 제어용 변수
+    private InputSystem_Actions playerControls;
+    
+    // --- 외부 제어용 변수 ---
     public bool canRotate = true;
-    public bool isAiming = false;
+    public bool isAiming { get; private set; }
 
     #endregion
 
 
-    #region 유니티 생명주기 함수 (Unity Lifecycle Methods)
+    #region 유니티 생명주기 및 입력 시스템 이벤트
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         cameraTransform = Camera.main.transform;
+        playerControls = new InputSystem_Actions();
 
-        // ▼▼▼ 수정된 부분: 자식 오브젝트의 모든 렌더러를 찾아 머티리얼 정보 저장 ▼▼▼
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers)
         {
-            // 각 렌더러의 모든 머티리얼을 순회하며 원본 색상 저장
             foreach (Material mat in renderer.materials)
             {
                 if (!originalMaterials.ContainsKey(mat))
@@ -81,22 +77,38 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
-        // ▲▲▲ 수정된 부분 ▲▲▲
     }
 
+    private void OnEnable()
+    {
+        playerControls.Player.Enable();
+        // ▼▼▼ 수정된 부분: Jump 액션의 performed와 canceled 이벤트를 모두 구독 ▼▼▼
+        playerControls.Player.Jump.performed += OnJumpPerformed;
+        playerControls.Player.Jump.canceled += OnJumpCanceled;
+        // ▲▲▲ 수정된 부분 ▲▲▲
+        playerControls.Player.Focusing.started += OnFocusingStarted;
+        playerControls.Player.Focusing.canceled += OnFocusingCanceled;
+    }
+
+    private void OnDisable()
+    {
+        playerControls.Player.Disable();
+        // ▼▼▼ 수정된 부분: Jump 액션의 구독 해제 ▼▼▼
+        playerControls.Player.Jump.performed -= OnJumpPerformed;
+        playerControls.Player.Jump.canceled -= OnJumpCanceled;
+        // ▲▲▲ 수정된 부분 ▲▲▲
+        playerControls.Player.Focusing.started -= OnFocusingStarted;
+        playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
+    }
+    
     private void Update()
     {
-        // 상태 판정
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         isHittingHead = Physics.CheckSphere(headCheck.position, headRadius, groundMask);
-
-        // 입력 처리
-        GetInput();
         
-        // 투명도 처리
+        ProcessInput();
         HandleTransparency();
 
-        // 타이머 및 상태 초기화
         if (isGrounded && rb.linearVelocity.y < 0.1f)
         {
             isBoosting = false;
@@ -108,15 +120,8 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
         }
 
-        if (isHittingHead)
-        {
-            isBoosting = false;
-        }
-
-        if (jumpBufferCounter > 0)
-        {
-            jumpBufferCounter -= Time.deltaTime;
-        }
+        if (isHittingHead) isBoosting = false;
+        if (jumpBufferCounter > 0) jumpBufferCounter -= Time.deltaTime;
     }
 
     private void FixedUpdate()
@@ -138,43 +143,39 @@ public class PlayerMovement : MonoBehaviour
 
     #region 커스텀 함수 (Custom Methods)
 
-    private void GetInput()
+    private void ProcessInput()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
+        moveInput = playerControls.Player.Move.ReadValue<Vector2>();
+    }
 
-        isAiming = Input.GetMouseButton(1);
+    private void OnJumpPerformed(InputAction.CallbackContext context)
+    {
+        jumpBufferCounter = jumpBufferTime;
+    }
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            jumpBufferCounter = jumpBufferTime;
-        }
+    // ▼▼▼ 추가된 함수: 점프 버튼을 뗐을 때 isBoosting을 false로 만듦 ▼▼▼
+    private void OnJumpCanceled(InputAction.CallbackContext context)
+    {
+        isBoosting = false;
+    }
+    // ▲▲▲ 추가된 함수 ▲▲▲
 
-        if (Input.GetButtonUp("Jump"))
-        {
-            isBoosting = false;
-        }
-        
-        // ▼▼▼ 수정된 부분: 마우스 입력에 따라 렌더링 모드 즉시 변경 ▼▼▼
-        if (Input.GetMouseButtonDown(1))
-        {
-            SetMaterialsTransparent(true);
-        }
-
-        if (Input.GetMouseButtonUp(1))
-        {
-            SetMaterialsTransparent(false);
-        }
-        // ▲▲▲ 수정된 부분 ▲▲▲
+    private void OnFocusingStarted(InputAction.CallbackContext context)
+    {
+        isAiming = true;
+        SetMaterialsTransparent(true);
     }
     
-    // ▼▼▼ 수정된 함수: 투명도 '값'만 부드럽게 변경 ▼▼▼
+    private void OnFocusingCanceled(InputAction.CallbackContext context)
+    {
+        isAiming = false;
+        SetMaterialsTransparent(false);
+    }
+    
     private void HandleTransparency()
     {
         if (originalMaterials.Count == 0) return;
-
         float targetAlpha = isAiming ? transparentAlpha : 1f;
-
         foreach (Material mat in originalMaterials.Keys)
         {
             Color newColor = mat.color;
@@ -183,9 +184,7 @@ public class PlayerMovement : MonoBehaviour
             mat.color = newColor;
         }
     }
-    // ▲▲▲ 수정된 함수 ▲▲▲
     
-    // ▼▼▼ 새로 추가된 함수: 머티리얼의 렌더링 '모드'를 변경 ▼▼▼
     private void SetMaterialsTransparent(bool transparent)
     {
         foreach (KeyValuePair<Material, Color> entry in originalMaterials)
@@ -198,9 +197,7 @@ public class PlayerMovement : MonoBehaviour
                 mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                 mat.SetInt("_ZWrite", 0);
-                mat.DisableKeyword("_ALPHATEST_ON");
                 mat.EnableKeyword("_ALPHABLEND_ON");
-                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
                 mat.renderQueue = 3000;
             }
             else
@@ -208,15 +205,12 @@ public class PlayerMovement : MonoBehaviour
                 mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
                 mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
                 mat.SetInt("_ZWrite", 1);
-                mat.DisableKeyword("_ALPHATEST_ON");
                 mat.DisableKeyword("_ALPHABLEND_ON");
-                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
                 mat.renderQueue = -1;
-                mat.color = originalColor; // 원래 색상으로 즉시 복구
+                mat.color = originalColor;
             }
         }
     }
-    // ▲▲▲ 새로 추가된 함수 ▲▲▲
 
     private void HandleJump()
     {
@@ -235,17 +229,15 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
         Vector3 camRight = new Vector3(cameraTransform.right.x, 0f, cameraTransform.right.z).normalized;
-        moveDirection = (camForward * verticalInput + camRight * horizontalInput).normalized;
+        moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
         if (canRotate)
         {
             Vector3 targetLookDirection = moveDirection;
-            
             if (isAiming)
             {
                 targetLookDirection = camForward;
             }
-            
             if (targetLookDirection.magnitude >= 0.1f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
@@ -284,3 +276,4 @@ public class PlayerMovement : MonoBehaviour
     }
     #endif
 }
+

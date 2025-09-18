@@ -95,13 +95,13 @@ public class InteractionUIController : MonoBehaviour
             case CropManager.CropState.Grown:
                 normalStatusGroup.SetActive(false); // 일반 정보 UI 끄기
                 statusMessageText.gameObject.SetActive(true); // 상태 메시지 켜기
-                statusMessageText.text = "Fully Grown\n(Press E to Harvest)";
+                statusMessageText.text = "Fully Grown\n(Press E/Game pad North to Harvest)";
                 break;
 
             case CropManager.CropState.Dead:
                 normalStatusGroup.SetActive(false); // 일반 정보 UI 끄기
                 statusMessageText.gameObject.SetActive(true); // 상태 메시지 켜기
-                statusMessageText.text = "Dead\n(Press E to Clear)";
+                statusMessageText.text = "Dead\n(Press E/Game pad North to Clear)";
                 break;
         }
     }

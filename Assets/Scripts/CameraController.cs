@@ -1,10 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // ▼▼▼ Input System 사용을 위해 추가 ▼▼▼
 
 public class CameraController : MonoBehaviour
 {
     [Header("타겟 설정 (Target Settings)")]
-    [SerializeField] private string targetTag = "Player";
-    private Transform target;
+    [SerializeField] private Transform target; // ▼▼▼ 직접 연결 방식으로 변경 ▼▼▼
 
     [Header("카메라 설정 (Camera Settings)")]
     [SerializeField] private Vector3 offset = new Vector3(0, 2f, -5f);
@@ -26,23 +26,45 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float minY = -30f;
     [SerializeField] private float maxY = 60f;
 
+    // --- 내부 변수 ---
     private float rotationX = 0f;
     private float rotationY = 0f;
-    private Vector3 currentOffset; // ▼▼▼ 추가된 부분: 부드러운 전환을 위한 현재 오프셋 변수
+    private Vector3 currentOffset;
+    private bool isAiming = false; // ▼▼▼ 조준 상태를 저장할 변수
+
+    // ▼▼▼ Input System 관련 변수 추가 ▼▼▼
+    private InputSystem_Actions playerControls;
+    private Vector2 lookInput;
+
+    private void Awake()
+    {
+        // Input Actions 인스턴스 생성
+        playerControls = new InputSystem_Actions();
+
+        if (target == null)
+        {
+            Debug.LogError("타겟이 Inspector에 연결되지 않았습니다!", this.gameObject);
+        }
+    }
+
+    private void OnEnable()
+    {
+        // Player 액션 맵 활성화 및 이벤트 구독
+        playerControls.Player.Enable();
+        playerControls.Player.Focusing.started += OnFocusingStarted;
+        playerControls.Player.Focusing.canceled += OnFocusingCanceled;
+    }
+
+    private void OnDisable()
+    {
+        // Player 액션 맵 비활성화 및 이벤트 구독 해제
+        playerControls.Player.Disable();
+        playerControls.Player.Focusing.started -= OnFocusingStarted;
+        playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
+    }
 
     void Start()
     {
-        GameObject targetObject = GameObject.FindWithTag(targetTag);
-        if (targetObject != null)
-        {
-            target = targetObject.transform;
-        }
-        else
-        {
-            Debug.LogError("'" + targetTag + "' 태그를 가진 타겟을 찾을 수 없습니다! 플레이어 오브젝트에 태그를 설정했는지 확인하세요.");
-            return;
-        }
-
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
@@ -50,7 +72,7 @@ public class CameraController : MonoBehaviour
         rotationX = angles.y;
         rotationY = angles.x;
         
-        currentOffset = offset; // ▼▼▼ 추가된 부분: 현재 오프셋 초기화
+        currentOffset = offset;
     }
 
     void LateUpdate()
@@ -61,13 +83,14 @@ public class CameraController : MonoBehaviour
         HandlePosition();
     }
 
-    /// <summary>
-    /// 마우스 입력에 따른 카메라 회전을 처리합니다.
-    /// </summary>
-    void HandleRotation()
+    private void HandleRotation()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        // ▼▼▼ Look 액션 값 읽기 ▼▼▼
+        lookInput = playerControls.Player.Look.ReadValue<Vector2>();
+
+        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
+        // ▲▲▲ 수정된 부분 ▲▲▲
 
         rotationX += mouseX;
         rotationY -= mouseY;
@@ -77,13 +100,10 @@ public class CameraController : MonoBehaviour
         transform.rotation = rotation;
     }
 
-    /// <summary>
-    /// 타겟 추적 및 카메라 충돌을 포함한 위치를 처리합니다.
-    /// </summary>
-    void HandlePosition()
+    private void HandlePosition()
     {
-        // ▼▼▼ 수정된 부분: 우클릭 상태에 따라 목표 오프셋 결정 ▼▼▼
-        Vector3 targetOffset = Input.GetMouseButton(1) ? aimOffset : offset;
+        // ▼▼▼ isAiming 변수를 사용하여 목표 오프셋 결정 ▼▼▼
+        Vector3 targetOffset = isAiming ? aimOffset : offset;
         currentOffset = Vector3.Lerp(currentOffset, targetOffset, Time.deltaTime * transitionSpeed);
         // ▲▲▲ 수정된 부분 ▲▲▲
 
@@ -103,6 +123,18 @@ public class CameraController : MonoBehaviour
             transform.position = desiredPosition;
         }
     }
+    
+    // ▼▼▼ Input System 이벤트 핸들러 함수들 ▼▼▼
+    private void OnFocusingStarted(InputAction.CallbackContext context)
+    {
+        isAiming = true;
+    }
+
+    private void OnFocusingCanceled(InputAction.CallbackContext context)
+    {
+        isAiming = false;
+    }
+    // ▲▲▲ 추가된 부분 ▲▲▲
     
     public void SetRotation(Quaternion newRotation)
     {
