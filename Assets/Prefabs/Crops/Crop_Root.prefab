@@ -165,12 +165,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cropVisuals: {fileID: 1449100938482993106}
-  growthDuration: 5
+  growthDuration: 50
   startScale: {x: 0.1, y: 0.1, z: 0.1}
   maxScale: {x: 1, y: 1, z: 1}
   minWaterAmount: 1600
   maxWaterAmount: 3200
-  waterLossPerSecond: 10
+  waterLossPerSecond: 20
 --- !u!65 &313523615387598
 BoxCollider:
   m_ObjectHideFlags: 0
