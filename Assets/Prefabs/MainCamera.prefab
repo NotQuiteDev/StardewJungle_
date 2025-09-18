@@ -151,8 +151,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetTag: Player
-  offset: {x: 0, y: 0.5, z: -2.5}
+  offset: {x: 0, y: 0.8, z: -2}
   mouseSensitivity: 1000
+  aimOffset: {x: -0.3, y: 0.5, z: -1}
+  transitionSpeed: 15
   collisionLayers:
     serializedVersion: 2
     m_Bits: 4294967295

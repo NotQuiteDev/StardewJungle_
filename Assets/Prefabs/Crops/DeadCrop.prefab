@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 73123720318029261}
   - component: {fileID: 5943734635435828767}
   - component: {fileID: 9189363515439259446}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 276df3cab019e824ead8eaa0854ae1ff, type: 2}
+  - {fileID: 2100000, guid: c3f9ffd113c30194b91d425b14d60150, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -117,9 +117,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5833278507963103966}
-  - component: {fileID: 4585414694965280100}
-  m_Layer: 0
-  m_Name: Crop
+  m_Layer: 6
+  m_Name: DeadCrop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -141,22 +140,3 @@ Transform:
   - {fileID: 8781653205187903423}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4585414694965280100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7034419279575728956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78caff2b9a6aef8459a673fe4faef9fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  growthDuration: 60
-  startScale: {x: 0.1, y: 0.1, z: 0.1}
-  maxScale: {x: 1, y: 1, z: 1}
-  minWaterAmount: 0
-  maxWaterAmount: 100
-  waterLossPerSecond: 1
-  deadCropPrefab: {fileID: 0}
