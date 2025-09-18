@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic; // Dictionary를 사용하기 위해 추가
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -10,20 +11,20 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float airMultiplier = 0.8f;
     [SerializeField] private float rotationSpeed = 15f;
-    [Tooltip("캐릭터의 움직임이 목표 속도에 도달하는 데 걸리는 시간입니다. 작을수록 빠릿합니다.")]
     [SerializeField] private float moveSmoothTime = 0.05f;
 
     [Header("점프 설정 (Jump Settings)")]
-    [Tooltip("점프 버튼을 누르는 즉시 적용될 초기 수직 속도입니다.")]
     [SerializeField] private float jumpInitialSpeed = 6f;
-    [Tooltip("점프 버튼을 누르고 있는 동안 추가로 가해지는 부스터 힘입니다.")]
     [SerializeField] private float boosterForce = 20f;
-    [Tooltip("부스터 힘이 최대로 지속될 수 있는 시간입니다.")]
     [SerializeField] private float maxBoostTime = 0.2f;
-    [Tooltip("착지 직전 점프 입력을 기억해주는 시간입니다. (점프 버퍼링)")]
     [SerializeField] private float jumpBufferTime = 0.15f;
-    [Tooltip("절벽에서 떨어진 직후 점프 입력을 허용하는 시간입니다. (코요테 타임)")]
     [SerializeField] private float coyoteTime = 0.1f;
+    
+    [Header("조준 시 투명화 (Aim Transparency)")]
+    [Tooltip("조준 시 캐릭터의 투명도입니다. (0: 완전 투명, 1: 완전 불투명)")]
+    [SerializeField] [Range(0f, 1f)] private float transparentAlpha = 0.3f;
+    [Tooltip("투명해지는 속도입니다.")]
+    [SerializeField] private float fadeSpeed = 10f;
 
     [Header("지면 판정 (Ground Check)")]
     [SerializeField] private Transform groundCheck;
@@ -48,6 +49,10 @@ public class PlayerMovement : MonoBehaviour
     private bool isHittingHead;
     private Vector3 velocityRef = Vector3.zero;
     
+    // ▼▼▼ 수정된 부분: 여러 머티리얼을 관리하기 위한 Dictionary ▼▼▼
+    private Dictionary<Material, Color> originalMaterials = new Dictionary<Material, Color>();
+    // ▲▲▲ 수정된 부분 ▲▲▲
+    
     // 외부 제어용 변수
     public bool canRotate = true;
     public bool isAiming = false;
@@ -62,13 +67,36 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         cameraTransform = Camera.main.transform;
+
+        // ▼▼▼ 수정된 부분: 자식 오브젝트의 모든 렌더러를 찾아 머티리얼 정보 저장 ▼▼▼
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
+        {
+            // 각 렌더러의 모든 머티리얼을 순회하며 원본 색상 저장
+            foreach (Material mat in renderer.materials)
+            {
+                if (!originalMaterials.ContainsKey(mat))
+                {
+                    originalMaterials.Add(mat, mat.color);
+                }
+            }
+        }
+        // ▲▲▲ 수정된 부분 ▲▲▲
     }
 
     private void Update()
     {
+        // 상태 판정
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         isHittingHead = Physics.CheckSphere(headCheck.position, headRadius, groundMask);
 
+        // 입력 처리
+        GetInput();
+        
+        // 투명도 처리
+        HandleTransparency();
+
+        // 타이머 및 상태 초기화
         if (isGrounded && rb.linearVelocity.y < 0.1f)
         {
             isBoosting = false;
@@ -85,8 +113,6 @@ public class PlayerMovement : MonoBehaviour
             isBoosting = false;
         }
 
-        GetInput();
-
         if (jumpBufferCounter > 0)
         {
             jumpBufferCounter -= Time.deltaTime;
@@ -102,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
         }
-
+        
         MovePlayer();
         HandleJump();
     }
@@ -117,6 +143,8 @@ public class PlayerMovement : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
+        isAiming = Input.GetMouseButton(1);
+
         if (Input.GetButtonDown("Jump"))
         {
             jumpBufferCounter = jumpBufferTime;
@@ -126,7 +154,69 @@ public class PlayerMovement : MonoBehaviour
         {
             isBoosting = false;
         }
+        
+        // ▼▼▼ 수정된 부분: 마우스 입력에 따라 렌더링 모드 즉시 변경 ▼▼▼
+        if (Input.GetMouseButtonDown(1))
+        {
+            SetMaterialsTransparent(true);
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            SetMaterialsTransparent(false);
+        }
+        // ▲▲▲ 수정된 부분 ▲▲▲
     }
+    
+    // ▼▼▼ 수정된 함수: 투명도 '값'만 부드럽게 변경 ▼▼▼
+    private void HandleTransparency()
+    {
+        if (originalMaterials.Count == 0) return;
+
+        float targetAlpha = isAiming ? transparentAlpha : 1f;
+
+        foreach (Material mat in originalMaterials.Keys)
+        {
+            Color newColor = mat.color;
+            float newAlpha = Mathf.Lerp(newColor.a, targetAlpha, Time.deltaTime * fadeSpeed);
+            newColor.a = newAlpha;
+            mat.color = newColor;
+        }
+    }
+    // ▲▲▲ 수정된 함수 ▲▲▲
+    
+    // ▼▼▼ 새로 추가된 함수: 머티리얼의 렌더링 '모드'를 변경 ▼▼▼
+    private void SetMaterialsTransparent(bool transparent)
+    {
+        foreach (KeyValuePair<Material, Color> entry in originalMaterials)
+        {
+            Material mat = entry.Key;
+            Color originalColor = entry.Value;
+
+            if (transparent)
+            {
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_ZWrite", 0);
+                mat.DisableKeyword("_ALPHATEST_ON");
+                mat.EnableKeyword("_ALPHABLEND_ON");
+                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                mat.renderQueue = 3000;
+            }
+            else
+            {
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                mat.SetInt("_ZWrite", 1);
+                mat.DisableKeyword("_ALPHATEST_ON");
+                mat.DisableKeyword("_ALPHABLEND_ON");
+                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                mat.renderQueue = -1;
+                mat.color = originalColor; // 원래 색상으로 즉시 복구
+            }
+        }
+    }
+    // ▲▲▲ 새로 추가된 함수 ▲▲▲
 
     private void HandleJump()
     {
@@ -143,37 +233,29 @@ public class PlayerMovement : MonoBehaviour
     
     private void MovePlayer()
     {
-        // 1. 목표 이동 방향 계산 (카메라 기준)
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
         Vector3 camRight = new Vector3(cameraTransform.right.x, 0f, cameraTransform.right.z).normalized;
         moveDirection = (camForward * verticalInput + camRight * horizontalInput).normalized;
 
-        // 2. 회전 처리
-        if (isAiming && canRotate)
+        if (canRotate)
         {
-            // 조준 시에는 카메라 정면을 즉시 바라봄 (기존 로직 유지)
-            if (camForward != Vector3.zero)
+            Vector3 targetLookDirection = moveDirection;
+            
+            if (isAiming)
             {
-                transform.rotation = Quaternion.LookRotation(camForward);
+                targetLookDirection = camForward;
+            }
+            
+            if (targetLookDirection.magnitude >= 0.1f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
+                rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed));
             }
         }
-        // 이동 입력이 있고, 회전이 가능한 상태일 때 (조준 중이 아닐 때)
-        else if (moveDirection.magnitude >= 0.1f && canRotate)
-        {
-            // ★★★★★★★★★★ 핵심 수정 ★★★★★★★★★★
-            // 바라보는 방향을 실제 이동 방향(moveDirection)이 아닌,
-            // 항상 카메라의 정면(camForward)으로 설정합니다.
-            Quaternion targetRotation = Quaternion.LookRotation(camForward, Vector3.up);
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★
 
-            rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed));
-        }
-
-        // 3. 목표 속도 계산 (이하 기존 코드와 동일)
         float currentSpeed = isGrounded ? moveSpeed : moveSpeed * airMultiplier;
         Vector3 targetVelocity = moveDirection * currentSpeed;
-
-        // 4. SmoothDamp를 사용하여 부드러운 속도 변경
+        
         Vector3 smoothedVelocity = Vector3.SmoothDamp(
             new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z),
             new Vector3(targetVelocity.x, 0, targetVelocity.z),
@@ -181,7 +263,6 @@ public class PlayerMovement : MonoBehaviour
             moveSmoothTime
         );
 
-        // 5. 최종 속도를 Rigidbody에 적용
         rb.linearVelocity = new Vector3(smoothedVelocity.x, rb.linearVelocity.y, smoothedVelocity.z);
     }
 
