@@ -156,7 +156,7 @@ MonoBehaviour:
   growthDuration: 60
   startScale: {x: 0.1, y: 0.1, z: 0.1}
   maxScale: {x: 1, y: 1, z: 1}
-  minWaterAmount: 0
-  maxWaterAmount: 100
-  waterLossPerSecond: 1
+  minWaterAmount: 1600
+  maxWaterAmount: 3200
+  waterLossPerSecond: 10
   deadCropPrefab: {fileID: 7034419279575728956, guid: 5f479bb1c8fa67949bca64d08446361e, type: 3}

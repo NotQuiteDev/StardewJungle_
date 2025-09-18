@@ -24,6 +24,8 @@ public class InteractionUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI waterAmountText;
     [Tooltip("수분 슬라이더의 최적 지점 마커(초록 막대)를 연결하세요.")] // ▼▼▼ 추가된 부분 ▼▼▼
     [SerializeField] private RectTransform optimalZoneMarker; // ▼▼▼ 추가된 부분 ▼▼▼
+    [Tooltip("현재 수치를 표시할 커스텀 마커를 연결하세요.")] // ▼▼▼ 추가된 부분 ▼▼▼
+    [SerializeField] private RectTransform currentValueMarker; 
 
     private CanvasGroup statusCanvasGroup;
     private RectTransform waterSliderRect;
@@ -89,6 +91,12 @@ public class InteractionUIController : MonoBehaviour
             float optimalPercent = crop.OptimalWaterAmount / crop.MaxWaterAmount;
             float sliderWidth = waterSliderRect.rect.width;
             optimalZoneMarker.anchoredPosition = new Vector2(sliderWidth * optimalPercent, optimalZoneMarker.anchoredPosition.y);
+        }
+        if (currentValueMarker != null && waterSliderRect != null)
+        {
+            float sliderWidth = waterSliderRect.rect.width;
+            // waterPercent 값은 위에서 이미 계산됨
+            currentValueMarker.anchoredPosition = new Vector2(sliderWidth * waterPercent, currentValueMarker.anchoredPosition.y);
         }
         // ▲▲▲ 추가된 부분 ▲▲▲
 

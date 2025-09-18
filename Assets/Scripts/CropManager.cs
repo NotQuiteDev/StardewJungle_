@@ -31,12 +31,13 @@ public class CropManager : MonoBehaviour
     private float growthTimer;
     private bool isDead = false;
     
+    // --- 외부 접근용 프로퍼티 (Public Properties) ---
     public float MaxWaterAmount => maxWaterAmount;
     public float GrowthDuration => growthDuration;
     public float GrowthTimer => growthTimer;
     public float OptimalWaterAmount => optimalWaterAmount;  
-
     public float MinWaterAmount => minWaterAmount;
+
     private void Start()
     {
         // 초기화
@@ -47,39 +48,38 @@ public class CropManager : MonoBehaviour
         waterRange = (maxWaterAmount - minWaterAmount) / 2f; // 점수 계산을 위한 범위
         CurrentWaterAmount = optimalWaterAmount;
 
-        // 1초마다 반복 실행할 함수 등록
-        InvokeRepeating(nameof(UpdatePerSecond), 1f, 1f);
+        // ▼▼▼ 변경점: InvokeRepeating 제거 ▼▼▼
+        // 1초마다 호출하는 딱딱한 방식을 사용하지 않습니다.
+        // InvokeRepeating(nameof(UpdatePerSecond), 1f, 1f);
     }
 
     private void Update()
     {
         if (isDead) return;
 
-        // 성장 처리 (부드러운 크기 변화)
+        // --- 성장 처리 (부드러운 크기 변화) ---
         if (growthTimer < growthDuration)
         {
             growthTimer += Time.deltaTime;
             float growthPercent = Mathf.Clamp01(growthTimer / growthDuration);
             transform.localScale = Vector3.Lerp(startScale, maxScale, growthPercent);
         }
-    }
 
-    /// <summary>
-    /// 1초마다 호출되는 업데이트 함수 (수분 감소, 점수 계산, 죽음 판정)
-    /// </summary>
-    private void UpdatePerSecond()
-    {
-        if (isDead) return;
+        // ▼▼▼ 변경점: UpdatePerSecond의 로직을 Update로 이동 ▼▼▼
+        // Time.deltaTime을 곱해서 매 프레임 부드럽게 값이 변하도록 만듭니다.
 
-        // 1. 수분 감소
-        CurrentWaterAmount -= waterLossPerSecond;
+        // 1. 수분 감소 (아날로그 방식)
+        CurrentWaterAmount -= waterLossPerSecond * Time.deltaTime;
 
-        // 2. 점수 갱신
+        // 2. 점수 갱신 (아날로그 방식)
         UpdateScore();
 
         // 3. 죽음 조건 확인
         CheckDeathCondition();
     }
+    
+    // ▼▼▼ 삭제: UpdatePerSecond() 함수는 더 이상 필요 없음 ▼▼▼
+    // private void UpdatePerSecond() { ... }
 
     /// <summary>
     /// 현재 수분 상태에 따라 점수를 계산하고 누적합니다.
@@ -95,7 +95,8 @@ public class CropManager : MonoBehaviour
         // 초당 얻는 점수는 품질에 비례 (최소 0점, 최대 1점)
         float pointsThisSecond = Mathf.Max(0, qualityMultiplier);
         
-        CurrentScore += pointsThisSecond;
+        // ▼▼▼ 변경점: Time.deltaTime을 곱해 점수도 부드럽게 누적 ▼▼▼
+        CurrentScore += pointsThisSecond * Time.deltaTime;
     }
 
     /// <summary>
@@ -112,7 +113,6 @@ public class CropManager : MonoBehaviour
     /// <summary>
     /// 작물에 물을 주는 함수 (외부에서 호출)
     /// </summary>
-    /// <param name="amount">줄 물의 양</param>
     public void WaterCrop(float amount)
     {
         if (isDead) return;
@@ -125,7 +125,6 @@ public class CropManager : MonoBehaviour
     private void Die()
     {
         isDead = true;
-        CancelInvoke(nameof(UpdatePerSecond)); // 1초 반복 중단
 
         Debug.Log($"작물이 죽었습니다! 최종 점수: {CurrentScore:F2}");
 
