@@ -23,6 +23,10 @@ public class InventoryManager : MonoBehaviour
     private InputAction nextAction;
     private int currentFocusIndex = 0;
 
+    [Header("수량(스택)")]
+    [SerializeField] private int[] slotCounts = new int[10]; // 슬롯 수와 동일 크기
+
+
     void Awake()
     {
         playerInput = FindObjectOfType<PlayerInput>();
@@ -48,6 +52,10 @@ public class InventoryManager : MonoBehaviour
     void Start()
     {
         StartCoroutine(InitializeFocusPosition());
+        // 데이터가 있고 카운트가 0이면 1로
+        for (int i = 0; i < inventorySlotsData.Length; i++)
+            if (inventorySlotsData[i] != null && slotCounts[i] <= 0) slotCounts[i] = 1;
+
         UpdateAllSlotIcons();
         EquipItem(currentFocusIndex);
     }
@@ -57,25 +65,69 @@ public class InventoryManager : MonoBehaviour
     {
         for (int i = 0; i < quickSlotsUI.Length; i++)
         {
-            // 슬롯의 자식 중에서 "ItemIcon"을 이름으로 찾아 그 Image 컴포넌트를 가져옵니다.
             Transform iconTransform = quickSlotsUI[i].transform.Find("ItemIcon");
-            if (iconTransform == null) continue; // ItemIcon 자식이 없으면 건너뜀
+            if (iconTransform == null) continue;
 
-            Image iconImage = iconTransform.GetComponent<Image>();
+            var iconImage = iconTransform.GetComponent<Image>();
+            var countTextTr = quickSlotsUI[i].transform.Find("Count"); // TextMeshProUGUI 추천 (없으면 null)
+            Text countText = countTextTr ? countTextTr.GetComponent<Text>() : null;
+            // (Text 대신 TMP를 쓰면 타입만 바꾸세요)
 
-            // 데이터가 있으면 아이콘을 활성화하고 이미지를 바꿉니다.
-            if (inventorySlotsData[i] != null && inventorySlotsData[i].itemIcon != null)
+            var data = (i < inventorySlotsData.Length) ? inventorySlotsData[i] : null;
+
+            if (data != null && data.itemIcon != null)
             {
-                iconImage.sprite = inventorySlotsData[i].itemIcon;
-                iconImage.enabled = true; // 이미지 컴포넌트 활성화
+                iconImage.sprite = data.itemIcon;
+
+                // ★ 씨앗이면 틴트, 아니면 흰색
+                if (data is SeedData sd) iconImage.color = sd.iconTint;
+                else iconImage.color = Color.white;
+
+                iconImage.enabled = true;
             }
-            // 데이터가 없으면 아이콘을 비활성화합니다.
             else
             {
                 iconImage.sprite = null;
-                iconImage.enabled = false; // 이미지 컴포넌트 비활성화
+                iconImage.enabled = false;
+            }
+
+            // 수량 표시 (선택)
+            int cnt = (i < slotCounts.Length) ? slotCounts[i] : 0;
+            if (countText != null)
+            {
+                countText.text = (data != null && cnt > 1) ? cnt.ToString() : ""; // 1 이하면 비움
             }
         }
+    }
+
+    public bool ConsumeFocusedItem(int amount)
+    {
+        int idx = currentFocusIndex;
+        if (idx < 0 || idx >= inventorySlotsData.Length) return false;
+        if (inventorySlotsData[idx] == null) return false;
+
+        int have = slotCounts[idx];
+        if (have < amount) return false;
+
+        slotCounts[idx] = have - amount;
+
+        if (slotCounts[idx] <= 0)
+        {
+            // 아이템 소진 → 슬롯 비움 + 장착 해제
+            slotCounts[idx] = 0;
+            inventorySlotsData[idx] = null;
+
+            if (currentEquippedItem != null)
+            {
+                Destroy(currentEquippedItem);
+                currentEquippedItem = null;
+            }
+        }
+
+        UpdateAllSlotIcons();
+        // 장착 오브젝트는 data가 null이면 자연히 없음. 안전하게 일치시킬려면:
+        EquipItem(currentFocusIndex);
+        return true;
     }
 
     private void UpdateFocusPosition()

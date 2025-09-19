@@ -27,6 +27,8 @@ public class InteractionUIController : MonoBehaviour
 
     private CanvasGroup statusCanvasGroup;
     private RectTransform waterSliderRect;
+    private enum TargetMode { None, Crop, FarmPlot }
+    private TargetMode _mode = TargetMode.None;
 
     private void Awake()
     {
@@ -45,19 +47,73 @@ public class InteractionUIController : MonoBehaviour
     private void Update()
     {
         if (raycastCamera == null || statusCanvasGroup == null) return;
+
         Ray ray = new Ray(raycastCamera.transform.position, raycastCamera.transform.forward);
-        
         if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance, interactableLayer))
         {
+            // 1) Crop 우선
             CropManager crop = hit.collider.GetComponentInParent<CropManager>();
             if (crop != null)
             {
+                SetMode(TargetMode.Crop);
                 statusCanvasGroup.alpha = 1f;
                 UpdateStatusUI(crop);
                 return;
             }
+
+            // 2) FarmPlot 다음
+            FarmPlot plot = hit.collider.GetComponentInParent<FarmPlot>();
+            if (plot != null)
+            {
+                SetMode(TargetMode.FarmPlot);
+                statusCanvasGroup.alpha = 1f;
+                UpdateFarmPlotUI(plot);
+                return;
+            }
         }
+
+        SetMode(TargetMode.None);
         statusCanvasGroup.alpha = 0f;
+    }
+
+    private void SetMode(TargetMode newMode)
+    {
+        if (_mode == newMode) return; // 같은 모드면 아무 것도 안 함 (토글 GC 방지)
+        _mode = newMode;
+
+        switch (_mode)
+        {
+            case TargetMode.Crop:
+                normalStatusGroup.SetActive(true);
+                statusMessageText.gameObject.SetActive(false);
+
+                // Crop 전용 보조 UI ON
+                growthSlider.gameObject.SetActive(true);
+                growthPercentText.gameObject.SetActive(true);
+                growthTimeText.gameObject.SetActive(true);
+                lowZoneDanger.gameObject.SetActive(true);
+                optimalZoneMarker.gameObject.SetActive(true);
+                currentValueMarker.gameObject.SetActive(true);
+                break;
+
+            case TargetMode.FarmPlot:
+                normalStatusGroup.SetActive(true);
+                statusMessageText.gameObject.SetActive(false);
+
+                // FarmPlot은 “수분/성장” 안 씀 → 관련 UI OFF (한 번만)
+                growthSlider.gameObject.SetActive(false);
+                growthPercentText.gameObject.SetActive(false);
+                growthTimeText.gameObject.SetActive(false);
+                lowZoneDanger.gameObject.SetActive(false);
+                optimalZoneMarker.gameObject.SetActive(false);
+                // currentValueMarker는 위치표시로 재활용
+                currentValueMarker.gameObject.SetActive(true);
+                break;
+
+            case TargetMode.None:
+                // 필요시 그룹을 유지하고 alpha만 0으로 해도 됨
+                break;
+        }
     }
 
     // ▼▼▼ 최종 수정된 UpdateStatusUI() 함수 ▼▼▼
@@ -68,13 +124,13 @@ public class InteractionUIController : MonoBehaviour
             case CropManager.CropState.Growing:
                 normalStatusGroup.SetActive(true);
                 statusMessageText.gameObject.SetActive(false); // 상태 메시지는 끈다
-                
+
                 // --- 수분 UI 업데이트 ---
                 float waterPercent = crop.CurrentWaterAmount / crop.MaxWaterAmount;
                 waterSlider.value = waterPercent;
                 waterValueText.text = $"Water: {waterPercent * 100f:F0}%";
                 waterAmountText.text = $"{crop.CurrentWaterAmount:F0} / {crop.MaxWaterAmount:F0}";
-                
+
                 // 마커 및 위험 구간 업데이트
                 float sliderWidth = waterSliderRect.rect.width;
                 lowZoneDanger.sizeDelta = new Vector2(sliderWidth * (crop.MinWaterAmount / crop.MaxWaterAmount), lowZoneDanger.sizeDelta.y);
@@ -104,6 +160,30 @@ public class InteractionUIController : MonoBehaviour
                 statusMessageText.text = "Dead\n(Press E/Game pad North to Clear)";
                 break;
         }
+    }
+    private void UpdateFarmPlotUI(FarmPlot plot)
+    {
+        // water 슬라이더를 "Tilled %"로 재활용
+        float tilled = plot.TilledPercentNormalized;
+        waterSlider.value = tilled;
+
+        // 라벨/텍스트 재활용
+        waterValueText.text = $"Tilled: {tilled * 100f:F0}%";
+        waterAmountText.text = plot.IsFullyTilled ? "Fully tilled" : $"{Mathf.RoundToInt(tilled * 100f)}%";
+
+        // 마커 위치(옵션): 현재값 마커만 움직임
+        if (waterSliderRect != null && currentValueMarker != null)
+        {
+            float w = waterSliderRect.rect.width;
+            currentValueMarker.anchoredPosition = new Vector2(w * tilled, currentValueMarker.anchoredPosition.y);
+        }
+
+        // 100%면 수치 숨기고 메시지로 바꾸고 싶다면:
+        // if (plot.IsFullyTilled) {
+        //     statusMessageText.gameObject.SetActive(true);
+        //     statusMessageText.text = "Tilled Soil";
+        //     normalStatusGroup.SetActive(false);
+        // }
     }
 }
 

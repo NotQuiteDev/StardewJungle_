@@ -124,13 +124,11 @@ public class PlayerMovement : MonoBehaviour
         ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
         if (currentItem == null) return;
 
-        // ★ 워터링캔이면 단발 Use() 금지 (홀드만)
+        // 단발 금지 도구는 제외
         if (currentItem is WateringCanData || currentItem is TillingHoeData) return;
-
 
         currentItem.Use(inventoryManager.equipPoint, cameraTransform);
     }
-
 
     private void Update()
     {

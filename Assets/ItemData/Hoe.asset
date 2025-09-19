@@ -19,7 +19,7 @@ MonoBehaviour:
   swingAdd01: 0.15
   swingCooldown: 0.5
   raycastDistance: 5
-  minSeparation: 0.5
+  minSeparation: 0.45
   gridSize: 0.01
   spawnHeightOffset: 0
   groundMask:
@@ -27,4 +27,4 @@ MonoBehaviour:
     m_Bits: 8
   farmPlotMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 64

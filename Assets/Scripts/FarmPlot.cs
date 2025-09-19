@@ -6,20 +6,22 @@ public class FarmPlot : MonoBehaviour
     [Header("Visual")]
     [SerializeField] private Renderer targetRenderer; // 비우면 자동으로 MeshRenderer 찾음
     [SerializeField] private Color UntilledColor = new Color(0.85f, 0.80f, 0.70f);
-    [SerializeField] private Color TilledColor   = new Color(0.35f, 0.22f, 0.10f);
+    [SerializeField] private Color TilledColor = new Color(0.35f, 0.22f, 0.10f);
 
     [Header("Logic")]
-    [SerializeField] [Range(0f, 1f)] private float tilled01 = 0f; // 0~1
+    [SerializeField][Range(0f, 1f)] private float tilled01 = 0f; // 0~1
     [SerializeField] private float decayPerSec = 0.05f; // 초당 감소율
     [SerializeField] private bool lockAtFull = true;    // 100%면 감소 중지
 
     // 외부에서 읽기용
     public float TilledPercentNormalized => tilled01;
-    public bool  IsFullyTilled           => tilled01 >= 1f - 1e-4f;
+    public bool IsFullyTilled => tilled01 >= 1f - 1e-4f;
 
     // 이 프레임에 갈렸는지 표시 (감소 방지)
     private bool _tilledThisFrame = false;
     private Material _mat;
+
+    [SerializeField] private Transform plantAnchor; // 선택
 
     private void Awake()
     {
@@ -69,4 +71,18 @@ public class FarmPlot : MonoBehaviour
             _mat.color = Color.Lerp(UntilledColor, TilledColor, tilled01);
         }
     }
+
+    public bool HasAnyCrop()
+    {
+        // 자신의 자식 중 CropManager가 하나라도 있으면 점유된 것으로 간주
+        return GetComponentInChildren<CropManager>() != null;
+    }
+
+    public Vector3 GetPlantSpawnPoint(float yOffsetFallback)
+    {
+        if (plantAnchor != null)
+            return plantAnchor.position;
+        return new Vector3(transform.position.x, transform.position.y + yOffsetFallback, transform.position.z);
+    }
+    
 }
