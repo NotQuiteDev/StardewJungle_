@@ -125,7 +125,8 @@ public class PlayerMovement : MonoBehaviour
         if (currentItem == null) return;
 
         // ★ 워터링캔이면 단발 Use() 금지 (홀드만)
-        if (currentItem is WateringCanData) return;
+        if (currentItem is WateringCanData || currentItem is TillingHoeData) return;
+
 
         currentItem.Use(inventoryManager.equipPoint, cameraTransform);
     }
