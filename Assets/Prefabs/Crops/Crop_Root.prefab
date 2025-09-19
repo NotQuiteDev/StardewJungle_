@@ -171,6 +171,12 @@ MonoBehaviour:
   minWaterAmount: 1600
   maxWaterAmount: 3200
   waterLossPerSecond: 20
+  overrideOptimalWater: 0
+  optimalWaterAmountInspector: 50
+  greenZoneWidth01: 0.15
+  falloffExponent: 1
+  debugWaterEverySecond: 1
+  qualityAccum: 0
 --- !u!65 &313523615387598
 BoxCollider:
   m_ObjectHideFlags: 0
