@@ -9,17 +9,32 @@ public class WateringCanRuntime : MonoBehaviour
     private Transform _cam;
     private WateringCanData _data;
 
-    // 시작: 데이터/장착점/카메라 정보 세팅 + 루프 가동
+    // 파티클 오브젝트 (부모 없음, 월드 스페이스)
+    private GameObject _psGO;
+
+    // 시작: 데이터/장착점/카메라 세팅 + 루프
     public void StartWatering(WateringCanData data, Transform equip, Transform cam)
     {
         _data = data;
         _equip = equip;
         _cam = cam;
 
+        if (_ps == null && _data.waterParticlesPrefab != null)
+        {
+            // ※ 부모를 붙이지 말자. (부모 비활성/파괴 시 메모리 에러 방지)
+            _psGO = Instantiate(_data.waterParticlesPrefab, _equip.position, _equip.rotation);
+            _ps = _psGO.GetComponent<ParticleSystem>();
+
+            // 안전장치: Simulation Space는 World여야 한다.
+            var main = _ps.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            _ps.Play();
+        }
+
         if (_loop == null) _loop = StartCoroutine(WaterLoop());
     }
 
-    // 종료: 루프와 파티클 정지
     public void StopWatering()
     {
         if (_loop != null)
@@ -27,48 +42,90 @@ public class WateringCanRuntime : MonoBehaviour
             StopCoroutine(_loop);
             _loop = null;
         }
+        StartCoroutine(StopAndCleanupParticles());
+    }
+
+    private IEnumerator StopAndCleanupParticles()
+    {
         if (_ps != null)
         {
+            // 먼저 방출 중지
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+            // 모든 살아있는 파티클이 사라질 때까지 대기 (안전)
+            // (최대 대기시간 방어)
+            float timeout = 1.0f;
+            while (_ps.IsAlive(true) && timeout > 0f)
+            {
+                timeout -= Time.deltaTime;
+                yield return null;
+            }
+
+            // 완전 정리
+            _ps.Clear(true);
         }
+
+        // 파괴 순서는 마지막에
+        if (_psGO != null)
+        {
+            Destroy(_psGO);
+            _psGO = null;
+        }
+        _ps = null;
     }
 
     private IEnumerator WaterLoop()
     {
-        // 파티클 인스턴스 1회 생성(장착점 자식으로 붙임)
-        if (_data.waterParticlesPrefab != null && _equip != null && _ps == null)
-        {
-            var go = Instantiate(_data.waterParticlesPrefab, _equip.position, _equip.rotation, _equip);
-            _ps = go.GetComponent<ParticleSystem>();
-            if (_ps != null) _ps.Play();
-        }
-
-        // 매 프레임: 레이캐스트 → 맞으면 초당량 * deltaTime 만큼 물 주기
         while (true)
         {
-            if (_ps != null)
+            // 파티클 오브젝트가 살아 있다면, 장착 위치/방향만 추적
+            if (_psGO != null && _equip != null)
             {
-                _ps.transform.position = _equip.position;
-                _ps.transform.rotation = _equip.rotation;
+                _psGO.transform.position = _equip.position;
+                _psGO.transform.rotation = _equip.rotation;
             }
 
-            Ray ray = new Ray(_cam.position, _cam.forward);
-            if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance))
+            // 레이캐스트 → 초당량 * deltaTime 물주기
+            if (_cam != null)
             {
-                // 자식/루트 어디 붙었든 안전하게 찾기
-                var crop = hit.collider.GetComponentInParent<CropManager>();
-                if (crop != null)
+                Ray ray = new Ray(_cam.position, _cam.forward);
+                if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance))
                 {
-                    float amount = _data.waterPerSecond * Time.deltaTime;
-                    crop.WaterCrop(amount);
-#if UNITY_EDITOR
-                    // 디버깅용(원하면 끄기)
-                    // Debug.Log($"{crop.name} +{amount:F3}");
-#endif
+                    var crop = hit.collider.GetComponentInParent<CropManager>();
+                    if (crop != null)
+                    {
+                        float amount = _data.waterPerSecond * Time.deltaTime;
+                        crop.WaterCrop(amount);
+                    }
                 }
             }
+            yield return null;
+        }
+    }
 
-            yield return null; // 다음 프레임
+    private void OnDisable()
+    {
+        // 비활성화 시에도 안전 정리
+        if (_loop != null)
+        {
+            StopCoroutine(_loop);
+            _loop = null;
+        }
+        // Stop 순서를 지켜서 크래시 방지
+        StartCoroutine(StopAndCleanupParticles());
+    }
+
+    private void OnDestroy()
+    {
+        // 추가 안전망
+        if (_ps != null)
+        {
+            _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            _ps.Clear(true);
+        }
+        if (_psGO != null)
+        {
+            Destroy(_psGO);
         }
     }
 }

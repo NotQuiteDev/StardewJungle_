@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
 
     private InventoryManager inventoryManager;
     private InputAction attackAction;
+    private bool isAttacking = false;   
 
     // --- 외부 제어용 변수 ---
     public bool canRotate = true;
@@ -258,17 +259,19 @@ public class PlayerMovement : MonoBehaviour
     private void MovePlayer()
     {
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
-        Vector3 camRight = new Vector3(cameraTransform.right.x, 0f, cameraTransform.right.z).normalized;
+        Vector3 camRight   = new Vector3(cameraTransform.right.x,  0f, cameraTransform.right.z).normalized;
+
+        // 이동 방향은 항상 카메라 기준 WASD
         moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
         if (canRotate)
         {
-            Vector3 targetLookDirection = moveDirection;
-            if (isAiming)
-            {
-                targetLookDirection = camForward;
-            }
-            if (targetLookDirection.magnitude >= 0.1f)
+            // ★ 조준중이거나 공격중이면 카메라를 바라본다
+            Vector3 targetLookDirection = (isAiming || isAttacking)
+                ? camForward
+                : moveDirection;
+
+            if (targetLookDirection.sqrMagnitude >= 0.01f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
                 rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed));
@@ -287,15 +290,22 @@ public class PlayerMovement : MonoBehaviour
 
         rb.linearVelocity = new Vector3(smoothedVelocity.x, rb.linearVelocity.y, smoothedVelocity.z);
     }
+
     private void OnAttackStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
+        isAttacking = true; // ★ 공격중 플래그 ON
+
         ItemData item = inventoryManager.GetCurrentFocusedItem();
         if (item == null) return;
+
+        // 홀드형 아이템 시작
         item.BeginUse(inventoryManager.equipPoint, cameraTransform, this);
     }
 
     private void OnAttackCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
+        isAttacking = false; // ★ 공격중 플래그 OFF
+
         ItemData item = inventoryManager.GetCurrentFocusedItem();
         if (item != null) item.EndUse();
 
