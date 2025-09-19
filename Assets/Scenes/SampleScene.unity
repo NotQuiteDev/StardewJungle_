@@ -2738,12 +2738,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventorySlotsData:
+  - {fileID: 11400000, guid: e50011a7d6a96ad4280031374e125f97, type: 2}
   - {fileID: 0}
   - {fileID: 11400000, guid: f6431dca928a9aa4aa7060527ef439ea, type: 2}
   - {fileID: 11400000, guid: 4ec9276398cbdac44a1c366b27c65512, type: 2}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 11400000, guid: e50011a7d6a96ad4280031374e125f97, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -2761,7 +2761,7 @@ MonoBehaviour:
   - {fileID: 938424018}
   focusUI: {fileID: 1684902889}
   equipPoint: {fileID: 2016263659}
-  slotCounts: 00000000000000000000000000000000000000001e00000000000000000000000000000000000000
+  slotCounts: 1e000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!1 &1152592949
 GameObject:
   m_ObjectHideFlags: 0
