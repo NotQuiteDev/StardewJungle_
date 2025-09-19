@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 간단 머리위 바: 현재 수분(Fill) + 그린존 밴드만 표시.
-/// 플레이어가 가까울 때만 보이고, 카메라를 향함.
+/// 간단 머리위 바: 현재 수분(Fill) + 그린존 밴드 + 현재 위치 핸들.
+/// - 플레이어 근접 시만 표시
+/// - 작물이 Growing이 아니면 자동 숨김(또는 파괴)
 /// </summary>
 [DisallowMultipleComponent]
 public class SimpleWaterBar : MonoBehaviour
@@ -21,10 +22,17 @@ public class SimpleWaterBar : MonoBehaviour
     public bool billboard = true;
     public bool hideWhenBehindCamera = true;
 
+    [Header("State-based Visibility")]
+    [Tooltip("Growing이 아닐 때 바를 숨김")]
+    public bool hideWhenNotGrowing = true;
+    [Tooltip("Growing이 아닐 때 컴포넌트를 파괴(오브젝트도 함께 삭제됨)")]
+    public bool destroyOnNotGrowing = false;
+
     private Transform _bar;
     private RectTransform _barArea;
     private Image _fill;
     private RectTransform _perfectZone;
+    private RectTransform _currentHandle;
 
     private CropManager _crop;
     private Camera _cam;
@@ -36,9 +44,8 @@ public class SimpleWaterBar : MonoBehaviour
         if (!_crop) { enabled = false; return; }
 
         if (!head) head = transform;
-        _cam = Camera.main ? Camera.main : FindFirstObjectByType<Camera>() ;
+        _cam = Camera.main ? Camera.main : FindFirstObjectByType<Camera>();
 
-        // 플레이어 찾기(없으면 거리검사 생략)
         var playerGo = GameObject.FindGameObjectWithTag(playerTag);
         _player = playerGo ? playerGo.transform : null;
     }
@@ -52,9 +59,10 @@ public class SimpleWaterBar : MonoBehaviour
         _bar = go.transform;
 
         // 자식 참조
-        _barArea     = go.transform.Find("BarArea")?.GetComponent<RectTransform>();
-        _fill        = go.transform.Find("BarArea/Fill")?.GetComponent<Image>();
-        _perfectZone = go.transform.Find("BarArea/PerfectZone")?.GetComponent<RectTransform>();
+        _barArea       = go.transform.Find("BarArea")?.GetComponent<RectTransform>();
+        _fill          = go.transform.Find("BarArea/Fill")?.GetComponent<Image>();
+        _perfectZone   = go.transform.Find("BarArea/PerfectZone")?.GetComponent<RectTransform>();
+        _currentHandle = go.transform.Find("BarArea/CurrentHandle")?.GetComponent<RectTransform>();
 
         // 안전 세팅
         ForceLeftAnchors(_barArea);
@@ -67,6 +75,7 @@ public class SimpleWaterBar : MonoBehaviour
             _fill.raycastTarget = false;
         }
         ForceLeftAnchors(_perfectZone);
+        ForceLeftAnchors(_currentHandle);
         DisableRaycasts(go);
     }
 
@@ -74,7 +83,23 @@ public class SimpleWaterBar : MonoBehaviour
     {
         if (!_bar || !_barArea || !_crop) return;
 
-        // 위치
+        // ★ Growing 상태가 아니면 숨기거나 제거
+        if (hideWhenNotGrowing && _crop.State != CropManager.CropState.Growing)
+        {
+            if (destroyOnNotGrowing)
+            {
+                Destroy(_bar.gameObject);
+                Destroy(this);
+                return;
+            }
+            else
+            {
+                if (_bar.gameObject.activeSelf) _bar.gameObject.SetActive(false);
+                return;
+            }
+        }
+
+        // 위치 계산
         Vector3 pos = (head ? head.position : transform.position) + Vector3.up * yOffset;
 
         // 가시성(거리 + 카메라 뒤)
@@ -90,7 +115,7 @@ public class SimpleWaterBar : MonoBehaviour
             if (Vector3.Dot(_cam.transform.forward, dir) < 0f) visible = false;
         }
 
-        if (!visible) { _bar.gameObject.SetActive(false); return; }
+        if (!visible) { if (_bar.gameObject.activeSelf) _bar.gameObject.SetActive(false); return; }
         if (!_bar.gameObject.activeSelf) _bar.gameObject.SetActive(true);
 
         _bar.position = pos;
@@ -105,21 +130,18 @@ public class SimpleWaterBar : MonoBehaviour
         float pCur = Mathf.Clamp01(Mathf.InverseLerp(min, max, cur));
         float pOpt = Mathf.Clamp01(Mathf.InverseLerp(min, max, opt));
 
-        // CropManager에 그린존 폭 필드가 있다고 가정(이전 단계에서 추가함)
-        // 없으면 고정값(예: 0.2f)로 써도 됨.
+        // CropManager에 GreenZoneWidth01 프로퍼티가 있으면 사용, 없으면 0.2
         float greenWidth01 = GetGreenZoneWidth01OrDefault();
-
         float half = Mathf.Clamp01(greenWidth01) * 0.5f;
         float pL = Mathf.Clamp01(pOpt - half);
         float pR = Mathf.Clamp01(pOpt + half);
 
-        // 폭
         float w = _barArea.rect.width;
 
         // Fill
         if (_fill) _fill.fillAmount = pCur;
 
-        // PerfectZone 밴드(위치/폭 설정)
+        // PerfectZone 밴드
         if (_perfectZone)
         {
             _perfectZone.anchoredPosition = new Vector2(w * pL, _perfectZone.anchoredPosition.y);
@@ -127,19 +149,25 @@ public class SimpleWaterBar : MonoBehaviour
             sd.x = Mathf.Max(0f, (pR - pL) * w);
             _perfectZone.sizeDelta = sd;
         }
+
+        // 현재 위치 핸들
+        if (_currentHandle)
+        {
+            var ap = _currentHandle.anchoredPosition;
+            ap.x = w * pCur;
+            _currentHandle.anchoredPosition = ap;
+        }
     }
 
     private float GetGreenZoneWidth01OrDefault()
     {
-        // CropManager에 public 접근자 있으면 사용
-        // (ex) public float GreenZoneWidth01 => greenZoneWidth01;
         var prop = typeof(CropManager).GetProperty("GreenZoneWidth01",
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
         if (prop != null) {
             object v = prop.GetValue(_crop, null);
             if (v is float f) return Mathf.Clamp01(f);
         }
-        return 0.20f; // 없으면 기본 20%
+        return 0.20f; // fallback
     }
 
     private static void ForceLeftAnchors(RectTransform rt)
