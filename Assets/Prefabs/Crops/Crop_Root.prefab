@@ -126,6 +126,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1449100938482993106}
+  - component: {fileID: 4409355049231422912}
   m_Layer: 6
   m_Name: Crop
   m_TagString: Untagged
@@ -229,7 +230,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.7, y: 1, z: 0.7}
+  m_Size: {x: 0.5, y: 1, z: 0.5}
   m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &6653730108744054437
 MonoBehaviour:
@@ -250,6 +251,8 @@ MonoBehaviour:
   playerTag: Player
   billboard: 1
   hideWhenBehindCamera: 1
+  hideWhenNotGrowing: 1
+  destroyOnNotGrowing: 0
 --- !u!1001 &8013716220660740913
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -311,5 +314,29 @@ PrefabInstance:
     - {fileID: 4585414694965280100, guid: cd216b37608e09c469ed3074a8815545, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7034419279575728956, guid: cd216b37608e09c469ed3074a8815545, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4409355049231422912}
   m_SourcePrefab: {fileID: 100100000, guid: cd216b37608e09c469ed3074a8815545, type: 3}
+--- !u!65 &4409355049231422912
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2987576661718655791}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 1, z: 0.5}
+  m_Center: {x: 0, y: 0.5, z: 0}
