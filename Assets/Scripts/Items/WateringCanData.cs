@@ -7,7 +7,7 @@ public class WateringCanData : ItemData
     [Tooltip("분사 파티클 프리팹(Particle System 포함된 GO)")]
     public GameObject waterParticlesPrefab;
 
-    [Tooltip("초당 물 주입량 (CropManager가 기대하는 단위에 맞추기)")]
+    [Tooltip("초당 물 주입량 (CropManager 단위에 맞추기)")]
     public float waterPerSecond = 5f;
 
     [Tooltip("레이 사거리(카메라 기준)")]
@@ -25,6 +25,6 @@ public class WateringCanData : ItemData
         runtime.StartWatering(this, equipPoint, cameraTransform);
     }
 
-    // 홀드 종료는 호출부(플레이어)에서 runtime.StopWatering()로 처리
-    public override void EndUse() { }
+    // 홀드 종료: 실행 컴포넌트에 정지 요청
+    public override void EndUse() { /* 호출부에서 StopWatering() 호출됨 */ }
 }

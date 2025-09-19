@@ -3,90 +3,79 @@ using System.Collections;
 
 public class WateringCanRuntime : MonoBehaviour
 {
-    private Coroutine _loop;
-    private ParticleSystem _ps;
+    // 외부에서 주입되는 참조/설정
+    private WateringCanData _data;
     private Transform _equip;
     private Transform _cam;
-    private WateringCanData _data;
 
-    // 파티클 오브젝트 (부모 없음, 월드 스페이스)
+    // 파티클 인스턴스(재사용)
     private GameObject _psGO;
+    private ParticleSystem _ps;
 
-    // 시작: 데이터/장착점/카메라 세팅 + 루프
+    // 루프/상태
+    private Coroutine _loop;
+    private bool _isWatering = false;   // 디바운스용
+    private bool _loopRequested = false;
+
+    // -----------------------
+    // 공개 API
+    // -----------------------
     public void StartWatering(WateringCanData data, Transform equip, Transform cam)
     {
-        _data = data;
+        _data  = data;
         _equip = equip;
-        _cam = cam;
+        _cam   = cam;
 
-        if (_ps == null && _data.waterParticlesPrefab != null)
+        EnsureParticleExists();
+
+        if (_ps != null)
         {
-            // ※ 부모를 붙이지 말자. (부모 비활성/파괴 시 메모리 에러 방지)
-            _psGO = Instantiate(_data.waterParticlesPrefab, _equip.position, _equip.rotation);
-            _ps = _psGO.GetComponent<ParticleSystem>();
+            // 노즐 위치/방향 동기화
+            if (_equip != null)
+            {
+                _psGO.transform.position = _equip.position;
+                _psGO.transform.rotation = _equip.rotation;
+            }
 
-            // 안전장치: Simulation Space는 World여야 한다.
-            var main = _ps.main;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
-
-            _ps.Play();
+            // ★★ 핵심: 빠른 재시작을 위해 하드 리셋
+            _ps.Clear(true);                               // 버퍼 초기화
+            var emission = _ps.emission; emission.enabled = true;
+            if (!_ps.isPlaying) _ps.Play(true);            // 즉시 재생
         }
 
-        if (_loop == null) _loop = StartCoroutine(WaterLoop());
+        _isWatering = true; // 루프는 항상 돌고 있으므로, 이 플래그만 켠다
     }
+
 
     public void StopWatering()
     {
-        if (_loop != null)
-        {
-            StopCoroutine(_loop);
-            _loop = null;
-        }
-        StartCoroutine(StopAndCleanupParticles());
-    }
+        if (!_isWatering) return;
+        _isWatering = false;
 
-    private IEnumerator StopAndCleanupParticles()
-    {
         if (_ps != null)
         {
-            // 먼저 방출 중지
+            // 즉시 방출 중지. Clear는 하지 말고(바로 재시작 대비), 루프에서 필요 시 Start에서 Clear
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-
-            // 모든 살아있는 파티클이 사라질 때까지 대기 (안전)
-            // (최대 대기시간 방어)
-            float timeout = 1.0f;
-            while (_ps.IsAlive(true) && timeout > 0f)
-            {
-                timeout -= Time.deltaTime;
-                yield return null;
-            }
-
-            // 완전 정리
-            _ps.Clear(true);
         }
-
-        // 파괴 순서는 마지막에
-        if (_psGO != null)
-        {
-            Destroy(_psGO);
-            _psGO = null;
-        }
-        _ps = null;
     }
 
-    private IEnumerator WaterLoop()
+
+    // -----------------------
+    // 내부 루프
+    // -----------------------
+    private System.Collections.IEnumerator WaterLoop()
     {
         while (true)
         {
-            // 파티클 오브젝트가 살아 있다면, 장착 위치/방향만 추적
+            // 파티클 노즐 위치/회전 추적
             if (_psGO != null && _equip != null)
             {
                 _psGO.transform.position = _equip.position;
                 _psGO.transform.rotation = _equip.rotation;
             }
 
-            // 레이캐스트 → 초당량 * deltaTime 물주기
-            if (_cam != null)
+            // 물 공급
+            if (_isWatering && _cam != null && _data != null)
             {
                 Ray ray = new Ray(_cam.position, _cam.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance))
@@ -94,38 +83,79 @@ public class WateringCanRuntime : MonoBehaviour
                     var crop = hit.collider.GetComponentInParent<CropManager>();
                     if (crop != null)
                     {
-                        float amount = _data.waterPerSecond * Time.deltaTime;
-                        crop.WaterCrop(amount);
+                        crop.WaterCrop(_data.waterPerSecond * Time.deltaTime);
                     }
                 }
             }
+
             yield return null;
         }
     }
 
+
+    private void OnEnable()
+    {
+        if (_loop == null) _loop = StartCoroutine(WaterLoop());
+    }
+
     private void OnDisable()
     {
-        // 비활성화 시에도 안전 정리
+        _isWatering = false;
+
+        if (_ps != null)
+        {
+            // 즉시 멈추고 잔여 파티클도 정리
+            _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
         if (_loop != null)
         {
             StopCoroutine(_loop);
             _loop = null;
         }
-        // Stop 순서를 지켜서 크래시 방지
-        StartCoroutine(StopAndCleanupParticles());
     }
 
     private void OnDestroy()
     {
-        // 추가 안전망
+        // 최종 정리(여기서만 파괴)
+        if (_loop != null)
+        {
+            StopCoroutine(_loop);
+            _loop = null;
+        }
+        _loopRequested = false;
+        _isWatering = false;
+
         if (_ps != null)
         {
-            _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            _ps.Clear(true);
+            _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _ps = null;
         }
         if (_psGO != null)
         {
             Destroy(_psGO);
+            _psGO = null;
         }
     }
+
+    // -----------------------
+    // 유틸
+    // -----------------------
+    private void EnsureParticleExists()
+    {
+        if (_ps != null) return;
+        if (_data == null || _data.waterParticlesPrefab == null) return;
+
+        _psGO = Instantiate(_data.waterParticlesPrefab);
+        _ps   = _psGO.GetComponent<ParticleSystem>();
+
+        if (_ps != null)
+        {
+            var main = _ps.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World; // 중요
+            main.loop = true;                                          // 중요
+            main.stopAction = ParticleSystemStopAction.None;
+        }
+    }
+
 }

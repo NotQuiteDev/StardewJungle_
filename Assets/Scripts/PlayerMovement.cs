@@ -121,16 +121,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        // 1. 인벤토리 매니저에서 현재 들고 있는 아이템 정보를 가져옵니다.
         ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
+        if (currentItem == null) return;
 
-        // 2. 아이템이 존재하면, 그 아이템의 Use() 함수를 호출합니다.
-        if (currentItem != null)
-        {
-            // Use 함수에 필요한 정보(장착 위치, 카메라 위치)를 넘겨줍니다.
-            currentItem.Use(inventoryManager.equipPoint, cameraTransform);
-        }
+        // ★ 워터링캔이면 단발 Use() 금지 (홀드만)
+        if (currentItem is WateringCanData) return;
+
+        currentItem.Use(inventoryManager.equipPoint, cameraTransform);
     }
+
 
     private void Update()
     {
@@ -267,9 +266,7 @@ public class PlayerMovement : MonoBehaviour
         if (canRotate)
         {
             // ★ 조준중이거나 공격중이면 카메라를 바라본다
-            Vector3 targetLookDirection = (isAiming || isAttacking)
-                ? camForward
-                : moveDirection;
+            Vector3 targetLookDirection = (isAiming || isAttacking) ? camForward : moveDirection;
 
             if (targetLookDirection.sqrMagnitude >= 0.01f)
             {
