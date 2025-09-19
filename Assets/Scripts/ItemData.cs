@@ -7,6 +7,10 @@ public abstract class ItemData : ScriptableObject
     public Sprite itemIcon;
     public GameObject itemPrefab;
 
-    // Use 함수의 인자를 더 명확하게 변경!
+    // 단발 사용 (그대로 유지)
     public abstract void Use(Transform equipPoint, Transform cameraTransform);
+
+    // 홀드형 사용 시작/종료 (기본은 아무 일도 안 함)
+    public virtual void BeginUse(Transform equipPoint, Transform cameraTransform, MonoBehaviour runner) {}
+    public virtual void EndUse() {}
 }

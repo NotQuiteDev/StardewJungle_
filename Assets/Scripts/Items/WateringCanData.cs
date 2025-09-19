@@ -4,31 +4,27 @@ using UnityEngine;
 public class WateringCanData : ItemData
 {
     [Header("물뿌리개 전용 설정")]
+    [Tooltip("분사 파티클 프리팹(Particle System 포함된 GO)")]
     public GameObject waterParticlesPrefab;
-    public float waterAmount = 5f;
+
+    [Tooltip("초당 물 주입량 (CropManager가 기대하는 단위에 맞추기)")]
+    public float waterPerSecond = 5f;
+
+    [Tooltip("레이 사거리(카메라 기준)")]
     public float raycastDistance = 5f;
 
-    // 변경된 인자에 맞춰 Use 함수 수정
-    public override void Use(Transform equipPoint, Transform cameraTransform)
-    {
-        // 1. 물 파티클 생성
-        if (waterParticlesPrefab != null && equipPoint != null)
-        {
-            Instantiate(waterParticlesPrefab, equipPoint.position, equipPoint.rotation);
-        }
+    // 단발 사용은 비워도 됨(호환용)
+    public override void Use(Transform equipPoint, Transform cameraTransform) { }
 
-        // 2. 전달받은 카메라 위치에서 레이캐스트 발사
-        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
-        {
-            // 3. 맞은 오브젝트가 CropManager를 가지고 있는지 확인
-            CropManager crop = hit.collider.GetComponent<CropManager>();
-            if (crop != null)
-            {
-                // 4. CropManager가 있다면 물주기 함수 호출
-                crop.WaterCrop(waterAmount);
-                Debug.Log($"{crop.name}에 물을 {waterAmount}만큼 주었습니다.");
-            }
-        }
+    // 홀드 시작: 실행용 컴포넌트에 위임
+    public override void BeginUse(Transform equipPoint, Transform cameraTransform, MonoBehaviour runner)
+    {
+        if (runner == null) return;
+        var runtime = runner.GetComponent<WateringCanRuntime>();
+        if (runtime == null) runtime = runner.gameObject.AddComponent<WateringCanRuntime>();
+        runtime.StartWatering(this, equipPoint, cameraTransform);
     }
+
+    // 홀드 종료는 호출부(플레이어)에서 runtime.StopWatering()로 처리
+    public override void EndUse() { }
 }

@@ -20,9 +20,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float maxBoostTime = 0.2f;
     [SerializeField] private float jumpBufferTime = 0.15f;
     [SerializeField] private float coyoteTime = 0.1f;
-    
+
     [Header("조준 시 투명화 (Aim Transparency)")]
-    [SerializeField] [Range(0f, 1f)] private float transparentAlpha = 0.3f;
+    [SerializeField][Range(0f, 1f)] private float transparentAlpha = 0.3f;
     [SerializeField] private float fadeSpeed = 10f;
 
     [Header("지면 판정 (Ground Check)")]
@@ -47,9 +47,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isHittingHead;
     private Vector3 velocityRef = Vector3.zero;
     private Dictionary<Material, Color> originalMaterials = new Dictionary<Material, Color>();
-    
+
     private InputSystem_Actions playerControls;
-    
+
     private InventoryManager inventoryManager;
     private InputAction attackAction;
 
@@ -92,9 +92,12 @@ public class PlayerMovement : MonoBehaviour
         playerControls.Player.Jump.performed += OnJumpPerformed;
         playerControls.Player.Jump.canceled += OnJumpCanceled;
         // ▲▲▲ 수정된 부분 ▲▲▲
+        // ★ 여기 추가: 홀드형 시작/종료
+        attackAction.started += OnAttackStarted;
+        attackAction.canceled += OnAttackCanceled;
+        attackAction.performed += OnAttackPerformed;
         playerControls.Player.Focusing.started += OnFocusingStarted;
         playerControls.Player.Focusing.canceled += OnFocusingCanceled;
-        attackAction.performed += OnAttack; // Attack 이벤트 구독
     }
 
     private void OnDisable()
@@ -104,12 +107,18 @@ public class PlayerMovement : MonoBehaviour
         playerControls.Player.Jump.performed -= OnJumpPerformed;
         playerControls.Player.Jump.canceled -= OnJumpCanceled;
         // ▲▲▲ 수정된 부분 ▲▲▲
+        // ★ 여기 추가: 구독 해제
+        attackAction.started -= OnAttackStarted;
+        attackAction.canceled -= OnAttackCanceled;
+
+        // (선택)
+        attackAction.performed -= OnAttackPerformed;
+
         playerControls.Player.Focusing.started -= OnFocusingStarted;
         playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
-        attackAction.performed -= OnAttack; // Attack 이벤트 구독 해제
     }
-    
-    private void OnAttack(InputAction.CallbackContext context)
+
+    private void OnAttackPerformed(InputAction.CallbackContext context)
     {
         // 1. 인벤토리 매니저에서 현재 들고 있는 아이템 정보를 가져옵니다.
         ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
@@ -154,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
         }
-        
+
         MovePlayer();
         HandleJump();
     }
@@ -186,13 +195,13 @@ public class PlayerMovement : MonoBehaviour
         isAiming = true;
         SetMaterialsTransparent(true);
     }
-    
+
     private void OnFocusingCanceled(InputAction.CallbackContext context)
     {
         isAiming = false;
         SetMaterialsTransparent(false);
     }
-    
+
     private void HandleTransparency()
     {
         if (originalMaterials.Count == 0) return;
@@ -205,7 +214,7 @@ public class PlayerMovement : MonoBehaviour
             mat.color = newColor;
         }
     }
-    
+
     private void SetMaterialsTransparent(bool transparent)
     {
         foreach (KeyValuePair<Material, Color> entry in originalMaterials)
@@ -245,7 +254,7 @@ public class PlayerMovement : MonoBehaviour
             isBoosting = false;
         }
     }
-    
+
     private void MovePlayer()
     {
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
@@ -268,7 +277,7 @@ public class PlayerMovement : MonoBehaviour
 
         float currentSpeed = isGrounded ? moveSpeed : moveSpeed * airMultiplier;
         Vector3 targetVelocity = moveDirection * currentSpeed;
-        
+
         Vector3 smoothedVelocity = Vector3.SmoothDamp(
             new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z),
             new Vector3(targetVelocity.x, 0, targetVelocity.z),
@@ -278,10 +287,27 @@ public class PlayerMovement : MonoBehaviour
 
         rb.linearVelocity = new Vector3(smoothedVelocity.x, rb.linearVelocity.y, smoothedVelocity.z);
     }
+    private void OnAttackStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        ItemData item = inventoryManager.GetCurrentFocusedItem();
+        if (item == null) return;
+        item.BeginUse(inventoryManager.equipPoint, cameraTransform, this);
+    }
+
+    private void OnAttackCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        ItemData item = inventoryManager.GetCurrentFocusedItem();
+        if (item != null) item.EndUse();
+
+        // 워터링 정지 (있으면)
+        var runtime = GetComponent<WateringCanRuntime>();
+        if (runtime != null) runtime.StopWatering();
+    }
+
 
     #endregion
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
@@ -295,6 +321,6 @@ public class PlayerMovement : MonoBehaviour
             Gizmos.DrawWireSphere(headCheck.position, headRadius);
         }
     }
-    #endif
+#endif
 }
 
