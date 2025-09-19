@@ -50,6 +50,9 @@ public class PlayerMovement : MonoBehaviour
     
     private InputSystem_Actions playerControls;
     
+    private InventoryManager inventoryManager;
+    private InputAction attackAction;
+
     // --- 외부 제어용 변수 ---
     public bool canRotate = true;
     public bool isAiming { get; private set; }
@@ -65,6 +68,9 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
         cameraTransform = Camera.main.transform;
         playerControls = new InputSystem_Actions();
+
+        inventoryManager = GetComponent<InventoryManager>();
+        attackAction = playerControls.Player.Attack; // Attack 액션 찾아오기
 
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers)
@@ -88,6 +94,7 @@ public class PlayerMovement : MonoBehaviour
         // ▲▲▲ 수정된 부분 ▲▲▲
         playerControls.Player.Focusing.started += OnFocusingStarted;
         playerControls.Player.Focusing.canceled += OnFocusingCanceled;
+        attackAction.performed += OnAttack; // Attack 이벤트 구독
     }
 
     private void OnDisable()
@@ -99,13 +106,27 @@ public class PlayerMovement : MonoBehaviour
         // ▲▲▲ 수정된 부분 ▲▲▲
         playerControls.Player.Focusing.started -= OnFocusingStarted;
         playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
+        attackAction.performed -= OnAttack; // Attack 이벤트 구독 해제
     }
     
+    private void OnAttack(InputAction.CallbackContext context)
+    {
+        // 1. 인벤토리 매니저에서 현재 들고 있는 아이템 정보를 가져옵니다.
+        ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
+
+        // 2. 아이템이 존재하면, 그 아이템의 Use() 함수를 호출합니다.
+        if (currentItem != null)
+        {
+            // Use 함수에 필요한 정보(장착 위치, 카메라 위치)를 넘겨줍니다.
+            currentItem.Use(inventoryManager.equipPoint, cameraTransform);
+        }
+    }
+
     private void Update()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         isHittingHead = Physics.CheckSphere(headCheck.position, headRadius, groundMask);
-        
+
         ProcessInput();
         HandleTransparency();
 

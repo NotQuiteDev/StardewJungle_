@@ -100,6 +100,14 @@ public class InventoryManager : MonoBehaviour
             currentEquippedItem = Instantiate(itemToEquip.itemPrefab, equipPoint);
         }
     }
+    public ItemData GetCurrentFocusedItem()
+    {
+        if (currentFocusIndex >= 0 && currentFocusIndex < inventorySlotsData.Length)
+        {
+            return inventorySlotsData[currentFocusIndex];
+        }
+        return null;
+    }
     
     // --- 아래는 기존 포커스 이동 관련 함수들 (수정 없음) ---
     private IEnumerator InitializeFocusPosition()

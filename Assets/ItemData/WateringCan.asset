@@ -9,9 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 139b1f2694d68e249bb1745dd49d8ea3, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d2a89c6210d3774c9eef877e0309e0e, type: 3}
   m_Name: WateringCan
   m_EditorClassIdentifier: 
   itemName: Watering Can
   itemIcon: {fileID: 21300000, guid: 2a126abf873c32242b8fa358b483515c, type: 3}
   itemPrefab: {fileID: 6039387780736191232, guid: 828a43d00d2d50b42931ac8fbccaedad, type: 3}
+  waterParticlesPrefab: {fileID: 0}
+  waterAmount: 5
+  raycastDistance: 5
