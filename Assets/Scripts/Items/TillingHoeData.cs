@@ -40,8 +40,14 @@ public class TillingHoeData : ItemData
         if (runner == null) return;
         var runtime = runner.GetComponent<TillingHoeRuntime>();
         if (runtime == null) runtime = runner.gameObject.AddComponent<TillingHoeRuntime>();
-        runtime.SwingOnce(this, equipPoint, cameraTransform);
+
+        // ★ 누르는 순간 즉시 1회 스윙 + 홀드 시작
+        runtime.BeginTilling(this, equipPoint, cameraTransform);
     }
 
-    public override void EndUse() { }
+    public override void EndUse()
+    {
+        // 호출부(PlayerMovement)에서 Stop 호출
+        // 여긴 그대로 두되, 실제 정지는 런타임에서 처리
+    }
 }

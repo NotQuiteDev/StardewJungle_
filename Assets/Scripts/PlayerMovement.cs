@@ -153,6 +153,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (isHittingHead) isBoosting = false;
         if (jumpBufferCounter > 0) jumpBufferCounter -= Time.deltaTime;
+
+        if (!attackAction.IsPressed())
+        {
+            var hoeRuntime = GetComponent<TillingHoeRuntime>();
+            if (hoeRuntime != null) hoeRuntime.StopTilling();
+        }
     }
 
     private void FixedUpdate()
@@ -302,14 +308,18 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAttackCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
-        isAttacking = false; // ★ 공격중 플래그 OFF
+        isAttacking = false;
 
         ItemData item = inventoryManager.GetCurrentFocusedItem();
         if (item != null) item.EndUse();
 
-        // 워터링 정지 (있으면)
-        var runtime = GetComponent<WateringCanRuntime>();
-        if (runtime != null) runtime.StopWatering();
+        // 워터링 정지
+        var waterRuntime = GetComponent<WateringCanRuntime>();
+        if (waterRuntime != null) waterRuntime.StopWatering();
+
+        // ★ 호(경작) 정지 – 이 줄이 없으면 계속 경작됨
+        var hoeRuntime = GetComponent<TillingHoeRuntime>();
+        if (hoeRuntime != null) hoeRuntime.StopTilling();
     }
 
 

@@ -1,65 +1,115 @@
 using UnityEngine;
+using System.Collections;
 
 public class TillingHoeRuntime : MonoBehaviour
 {
+    private TillingHoeData _data;
+    private Transform _equip;
+    private Transform _cam;
+
+    private bool _isTilling = false;
+    private Coroutine _holdLoop;
     private float _lastSwingTime = -999f;
 
-    // 클릭 1번 = 스윙 1번
-    public void SwingOnce(TillingHoeData data, Transform equip, Transform cam)
+    // ===== 외부 API =====
+    public void BeginTilling(TillingHoeData data, Transform equip, Transform cam)
     {
-        if (data == null || cam == null) return;
+        _data  = data;
+        _equip = equip;
+        _cam   = cam;
 
-        // 쿨다운 체크
-        if (Time.time - _lastSwingTime < data.swingCooldown) return;
+        // 탭 즉시 1회
+        DoSwing();
+
+        // 홀드 시작
+        _isTilling = true;
+        if (_holdLoop == null && isActiveAndEnabled)
+            _holdLoop = StartCoroutine(HoldLoop());
+    }
+
+    public void StopTilling()
+    {
+        _isTilling = false;
+        if (_holdLoop != null)
+        {
+            StopCoroutine(_holdLoop);
+            _holdLoop = null;
+        }
+    }
+
+    // ===== 생명주기 안전 처리 =====
+    private void OnDisable()
+    {
+        _isTilling = false;
+        if (_holdLoop != null)
+        {
+            StopCoroutine(_holdLoop);
+            _holdLoop = null;
+        }
+    }
+
+    // ===== 내부 =====
+    private IEnumerator HoldLoop()
+    {
+        while (_isTilling && this != null && isActiveAndEnabled)
+        {
+            // 쿨다운 지난 경우에만 추가 스윙
+            if (Time.time - _lastSwingTime >= _data.swingCooldown)
+            {
+                DoSwing();
+            }
+            yield return null;
+        }
+        _holdLoop = null;
+    }
+
+    private void DoSwing()
+    {
+        if (_data == null || _cam == null) return;
+
+        // 쿨다운 체크 (탭-스팸 방지)
+        if (Time.time - _lastSwingTime < _data.swingCooldown) return;
         _lastSwingTime = Time.time;
 
-        // 1) 카메라 전방으로 레이 쏘기
-        int mask = data.farmPlotMask | data.groundMask;
-        if (!Physics.Raycast(new Ray(cam.position, cam.forward), out RaycastHit hit, data.raycastDistance, mask))
+        // 1) 카메라 전방 Ray (FarmPlot 또는 Ground)
+        int mask = _data.farmPlotMask | _data.groundMask;
+        if (!Physics.Raycast(new Ray(_cam.position, _cam.forward), out RaycastHit hit, _data.raycastDistance, mask))
             return;
 
-        // 2) 맞은 게 이미 경작지면: 생성 없이 Till 추가
+        // 2) 이미 경작지면: 생성 없이 Till 추가
         var existingPlot = hit.collider.GetComponentInParent<FarmPlot>();
         if (existingPlot != null)
         {
-            existingPlot.AddTill(data.swingAdd01);
+            existingPlot.AddTill(_data.swingAdd01);
             return;
         }
 
-        // 3) 아니면 Ground여야만 생성 (FarmPlotMask에 맞았을 때는 위에서 return 됨)
-        //    혹시 레이어가 섞여 있으면 Ground 전용으로 다시 한번 쏴서 안전하게 위치 확보
+        // 3) Ground 확정(안전 재캐스트)
         if (!Physics.Raycast(new Ray(hit.point + Vector3.up * 2f, Vector3.down),
-                             out RaycastHit groundHit, 5f, data.groundMask))
+                             out RaycastHit groundHit, 5f, _data.groundMask))
         {
-            // 첫 히트가 groundMask였을 수도 있으니, 그 좌표 사용
-            groundHit = hit;
+            groundHit = hit; // 첫 히트가 Ground였을 수 있음
         }
 
         // 4) 스냅/간격/높이 보정
         Vector3 spawnPos = groundHit.point;
-        if (data.gridSize > 0f) spawnPos = SnapToGrid(spawnPos, data.gridSize);
-        spawnPos.y = groundHit.point.y + data.spawnHeightOffset;
+        if (_data.gridSize > 0f) spawnPos = SnapToGrid(spawnPos, _data.gridSize);
+        spawnPos.y = groundHit.point.y + _data.spawnHeightOffset;
 
-        if (!IsSpaceFree(spawnPos, data.minSeparation, data.farmPlotMask))
-        {
-            // 주변에 이미 경작지가 있으면 생성하지 않음
-            return;
-        }
+        if (!IsSpaceFree(spawnPos, _data.minSeparation, _data.farmPlotMask))
+            return; // 근처에 이미 있으면 생성 금지
 
-        // 5) 경작지 생성 (정확히 1개만)
-        var go = Instantiate(data.farmPlotPrefab, spawnPos, Quaternion.identity);
+        // 5) 정확히 1개 생성 후 1회 Till
+        var go = Object.Instantiate(_data.farmPlotPrefab, spawnPos, Quaternion.identity);
         var plot = go.GetComponent<FarmPlot>();
         if (plot == null)
         {
             Debug.LogWarning("FarmPlot prefab missing FarmPlot component.");
             return;
         }
-
-        // 6) 스윙 1회분 만큼 경작
-        plot.AddTill(data.swingAdd01);
+        plot.AddTill(_data.swingAdd01);
     }
 
-    // --------- helpers ---------
     private static Vector3 SnapToGrid(Vector3 pos, float grid)
     {
         if (grid <= 0f) return pos;
@@ -70,7 +120,6 @@ public class TillingHoeRuntime : MonoBehaviour
 
     private static bool IsSpaceFree(Vector3 center, float radius, LayerMask farmPlotMask)
     {
-        // 중심에서 반경 검사(플롯 크기가 1x1이면 radius=1이 적당)
         var hits = Physics.OverlapSphere(center, radius, farmPlotMask, QueryTriggerInteraction.Ignore);
         return hits == null || hits.Length == 0;
     }
