@@ -95,25 +95,21 @@ public class ShopUIManager : MonoBehaviour
     // ## 추가: 판매 기능 구현 ##
     public void TrySellItem(ItemData itemData, int quantity)
     {
-        // ## 수정: 판매 불가 조건을 제거 ##
-        // if (itemData.sellPrice <= 0) ... 이 부분을 완전히 삭제한다.
-
         if (InventoryManager.Instance.RemoveItem(itemData, quantity))
         {
             int sellPrice = itemData.sellPrice * quantity;
             MoneyManager.Instance.AddMoney(sellPrice);
-            // ## 수정: 로그를 영어로 변경 ##
             Debug.Log($"Sold {itemData.itemName} x{quantity} for ${sellPrice}.");
-
-            PopulateSellPanel();
+            
+            // ## 수정: 판매 성공 후, 판매 패널을 즉시 새로고침 ##
+            PopulateSellPanel(); 
         }
         else
         {
-            // ## 수정: 로그를 영어로 변경 ##
             Debug.LogWarning($"Failed to sell {itemData.itemName}. (Not enough quantity?)");
         }
     }
-    // ## 추가/수정: 구매 실패 로그도 영어로 변경 ##
+
     public void TryPurchaseItem(ShopItem shopItem)
     {
         if (shopItem == null) return;
@@ -125,6 +121,9 @@ public class ShopUIManager : MonoBehaviour
             if (success)
             {
                 Debug.Log($"Purchased {shopItem.item.itemName} successfully!");
+                // ## 추가: 구매 성공 후, 판매 패널을 즉시 새로고침 ##
+                // 내 인벤토리가 바뀌었으니 판매 목록도 갱신되어야 함
+                PopulateSellPanel();
             }
             else
             {
