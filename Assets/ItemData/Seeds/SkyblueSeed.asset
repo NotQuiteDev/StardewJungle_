@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c27301c213e03b3439f5560ba48326ac, type: 3}
+  m_Name: SkyblueSeed
+  m_EditorClassIdentifier: 
+  itemName: Skyblue Seed
+  itemIcon: {fileID: 21300000, guid: f27ba19a39ac28348865d1821296b463, type: 3}
+  itemPrefab: {fileID: 8353128441858859296, guid: 7899b032fb1f0384fb2d9fb04c606b71, type: 3}
+  sellPrice: 150
+  plantPrefab: {fileID: 8969317990419264030, guid: f9a9513c300d67b4b89c12c8466621c8, type: 3}
+  raycastDistance: 5
+  farmPlotMask:
+    serializedVersion: 2
+    m_Bits: 64
+  plantYOffset: 0
+  iconTint: {r: 0, g: 0.76877165, b: 1, a: 1}

@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4254897117891458351
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2349210446775467494, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3710078648199231785, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: m_Name
+      value: Orange_Crop_Root Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[0].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: b36f9bfdc2364aa48a56fda18b7bbe39, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[1].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: 99983c66636438b4e91622ab7810d8fc, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[2].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: 147027a1fd5411449a6f6ae99134fe4d, type: 2}
+    - target: {fileID: 6207681443559674889, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7fe5679161e05fa458d8888a576b8ed7, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}

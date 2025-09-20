@@ -222,7 +222,7 @@ MonoBehaviour:
   - gradeName: Coper
     minScoreRequired: 0
     cropItemToDrop: {fileID: 0}
-  debugWaterEverySecond: 1
+  debugWaterEverySecond: 0
   qualityAccum: 0
 --- !u!65 &313523615387598
 BoxCollider:
