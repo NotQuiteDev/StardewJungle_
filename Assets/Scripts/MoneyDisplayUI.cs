@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro; // TextMeshPro 사용을 위해 필요
+using TMPro;
 
 public class MoneyDisplayUI : MonoBehaviour
 {
@@ -9,7 +9,9 @@ public class MoneyDisplayUI : MonoBehaviour
     {
         if (MoneyManager.Instance != null)
         {
+            MoneyManager.Instance.OnMoneyChanged -= UpdateMoneyText;
             MoneyManager.Instance.OnMoneyChanged += UpdateMoneyText;
+            UpdateMoneyText(MoneyManager.Instance.CurrentMoney);
         }
     }
 
@@ -21,22 +23,22 @@ public class MoneyDisplayUI : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void UpdateMoneyText(int newAmount)
     {
-        if (MoneyManager.Instance != null)
+        if (moneyText != null)
         {
-            UpdateMoneyText(MoneyManager.Instance.CurrentMoney);
+            moneyText.text = $"$ {newAmount:N0}";
         }
     }
 
     /// <summary>
-    /// MoneyManager로부터 신호를 받으면 호출되는 함수입니다.
+    /// 외부에서 UI를 강제로 새로고침하도록 명령하는 함수
     /// </summary>
-    private void UpdateMoneyText(int newAmount)
+    public void ForceUpdate()
     {
-        // ## ★★★★★ 핵심 수정 부분 ★★★★★ ##
-        // $"" 문법을 사용해 원화(₩) 기호와 세 자리 쉼표(,)를 포함하여 포매팅합니다.
-        moneyText.text = $"$ {newAmount:N0}";
-        // ===================================
+        if (MoneyManager.Instance != null)
+        {
+             UpdateMoneyText(MoneyManager.Instance.CurrentMoney);
+        }
     }
 }
