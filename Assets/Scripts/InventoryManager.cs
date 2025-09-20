@@ -7,6 +7,8 @@ using TMPro; // ## 1. TextMeshPro 사용을 위해 추가 ##
 
 public class InventoryManager : MonoBehaviour
 {
+    // ## 추가 1: 싱글턴 인스턴스 변수 ##
+    public static InventoryManager Instance { get; private set; }
     [Header("아이템 데이터")]
     public ItemData[] inventorySlotsData = new ItemData[10];
 
@@ -29,11 +31,23 @@ public class InventoryManager : MonoBehaviour
     private int currentFocusIndex = 0;
 
     [Header("수량(스택)")]
-    [SerializeField] private int[] slotCounts = new int[10];
+    [SerializeField] public int[] slotCounts = new int[10];
 
 
     void Awake()
     {
+        // ## 추가 2: 싱글턴 로직 ##
+        if (Instance == null)
+        {
+            Instance = this;
+            // 인벤토리는 보통 플레이어에 붙어있으므로 DontDestroyOnLoad는 플레이어 생명주기에 맡김
+        }
+        else
+        {
+            Destroy(gameObject);
+            return; // 중복 생성을 막고 아래 로직 실행 방지
+        }
+
         playerInput = FindObjectOfType<PlayerInput>();
         quickSlotSelectAction = playerInput.actions.FindAction("QuickSlotSelect");
         previousAction = playerInput.actions.FindAction("Previous");
@@ -219,6 +233,39 @@ public class InventoryManager : MonoBehaviour
         // 3. 빈 슬롯도 없으면 실패
         Debug.Log("인벤토리가 가득 찼습니다!");
         return false;
+    }
+    /// <summary>
+    /// 아이템 데이터와 수량을 지정하여 인벤토리에서 제거합니다. 판매 시 사용됩니다.
+    /// </summary>
+    public bool RemoveItem(ItemData itemToRemove, int count)
+    {
+        for (int i = 0; i < inventorySlotsData.Length; i++)
+        {
+            if (inventorySlotsData[i] == itemToRemove)
+            {
+                if (slotCounts[i] >= count)
+                {
+                    slotCounts[i] -= count;
+                    if (slotCounts[i] <= 0)
+                    {
+                        inventorySlotsData[i] = null;
+                        // 현재 장착된 아이템이 판매한 아이템이면 장착 해제
+                        if (i == currentFocusIndex)
+                        {
+                            EquipItem(i); 
+                        }
+                    }
+                    UpdateAllSlotIcons(); // UI 갱신
+                    return true;
+                }
+                else
+                {
+                    // 수량이 부족하면 실패
+                    return false; 
+                }
+            }
+        }
+        return false; // 해당 아이템이 인벤토리에 없음
     }
 
 }

@@ -6,6 +6,7 @@ public abstract class ItemData : ScriptableObject
     public string itemName;
     public Sprite itemIcon;
     public GameObject itemPrefab;
+    public int sellPrice;
 
     // 단발 사용 (그대로 유지)
     public abstract void Use(Transform equipPoint, Transform cameraTransform);
