@@ -618,7 +618,7 @@ RectTransform:
   m_Father: {fileID: 192124195}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1650,6 +1650,11 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!20 &649453467 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 3375154841290846347, guid: b06ec573b21481445a04846fd94497b0, type: 3}
+  m_PrefabInstance: {fileID: 1778415152}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &652093770
 GameObject:
   m_ObjectHideFlags: 0
@@ -1834,7 +1839,7 @@ RectTransform:
   m_Father: {fileID: 645167299}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 10, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2820,6 +2825,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22551cf2220398b4790b138d9e34a32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  raycastCamera: {fileID: 649453467}
+  raycastDistance: 5
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 64
   statusWindowGroup: {fileID: 1875316743}
   normalStatusGroup: {fileID: 804981872}
   statusMessageText: {fileID: 427915029}
@@ -2833,7 +2843,6 @@ MonoBehaviour:
   optimalZoneMarker: {fileID: 455984704}
   currentValueMarker: {fileID: 31144695}
   perfectZoneBand: {fileID: 703959613}
-  destroyLegacyObjects: 0
 --- !u!114 &1142102966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3456,7 +3465,7 @@ RectTransform:
   m_Father: {fileID: 455967783}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -4496,7 +4505,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1875316744
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4737,7 +4746,7 @@ RectTransform:
   m_Father: {fileID: 652093771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
