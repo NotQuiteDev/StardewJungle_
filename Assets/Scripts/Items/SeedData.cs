@@ -33,9 +33,10 @@ public class SeedData : ItemData
         var plot = hit.collider.GetComponentInParent<FarmPlot>();
         if (plot == null) return;
 
-        // 2) 완전 경작 & 미점유만 허용
-        if (!plot.IsFullyTilled) return;
-        if (plot.HasAnyCrop())   return; // 이미 식물 있음
+        // ## 수정된 부분 ##
+        // 2) 80% 이상 경작 & 미점유만 허용
+        if (!plot.IsReadyForPlanting) return;
+        if (plot.HasAnyCrop())        return;
 
         // 3) 스폰 위치: Anchor가 있으면 거기, 없으면 중앙 + y 오프셋
         Vector3 pos = plot.GetPlantSpawnPoint(plantYOffset);

@@ -19,7 +19,7 @@ MonoBehaviour:
   waterParticlesPrefab: {fileID: 2576731684681040835, guid: a8103ea57cfc9f243a538a77f2ecc107, type: 3}
   waterPerSecond: 100
   raycastDistance: 5
-  sprayRadius: 0.8
+  sprayRadius: 0.5
   sprayLength: 2
   waterableLayer:
     serializedVersion: 2

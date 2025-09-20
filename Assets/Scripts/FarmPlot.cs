@@ -16,6 +16,9 @@ public class FarmPlot : MonoBehaviour
     // 외부 읽기
     public float TilledPercentNormalized => tilled01;
     public bool  IsFullyTilled          => tilled01 >= 1f - 1e-4f;
+    
+    // ## 추가된 부분 ##
+    public bool IsReadyForPlanting => tilled01 >= 0.8f;
 
     // 프레임 플래그
     private bool _tilledThisFrame = false;
@@ -39,7 +42,6 @@ public class FarmPlot : MonoBehaviour
 
     private void Update()
     {
-        // 현재 플롯에 작물이 존재하는가?
         bool occupied = HasAnyCrop();
 
         // 1) (작물 없을 때만) 1.0 유지 타이머 처리 → 0.99로 강등
@@ -48,8 +50,8 @@ public class FarmPlot : MonoBehaviour
             float held = Time.time - _timeBecameFull;
             if (held >= fullHoldSeconds)
             {
-                tilled01 = 0.99f;      // 강제 99%
-                _timeBecameFull = -1f; // 타이머 종료
+                tilled01 = 0.99f;
+                _timeBecameFull = -1f;
                 ApplyColor();
             }
         }
@@ -75,13 +77,12 @@ public class FarmPlot : MonoBehaviour
         _tilledThisFrame = false;
     }
 
-    public void AddTill(float amount01) // amount01은 0~1 스케일
+    public void AddTill(float amount01)
     {
         float before = tilled01;
         tilled01 = Mathf.Clamp01(tilled01 + amount01);
         _tilledThisFrame = true;
 
-        // 막 1.0에 도달했다면 유지 타이머 시작
         if (tilled01 >= 1f - 1e-6f && before < 1f - 1e-6f)
             _timeBecameFull = Time.time;
 
@@ -97,7 +98,6 @@ public class FarmPlot : MonoBehaviour
 
     public bool HasAnyCrop()
     {
-        // 자신의 자식 중 CropManager가 하나라도 있으면 점유
         return GetComponentInChildren<CropManager>() != null;
     }
 
@@ -106,16 +106,12 @@ public class FarmPlot : MonoBehaviour
         if (plantAnchor != null) return plantAnchor.position;
         return new Vector3(transform.position.x, transform.position.y + yOffsetFallback, transform.position.z);
     }
-
-    /// <summary>
-    /// 수확/제거 시 호출: 경작률을 "최대 50%"로 강등.
-    /// 현재가 50%보다 낮으면 그대로 유지(올라가지 않음).
-    /// </summary>
+    
     public void OnHarvestedReduceToHalf()
     {
-        tilled01 = Mathf.Min(tilled01, 0.5f); // 낮추기 전용
-        _timeBecameFull = -1f;                // 1.0 유지 종료
-        _tilledThisFrame = true;              // 이번 프레임 감쇠 금지
+        tilled01 = Mathf.Min(tilled01, 0.5f);
+        _timeBecameFull = -1f;
+        _tilledThisFrame = true;
         ApplyColor();
     }
 }
