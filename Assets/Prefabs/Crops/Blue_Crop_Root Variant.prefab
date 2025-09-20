@@ -65,6 +65,10 @@ PrefabInstance:
       value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 8996529731388072923, guid: f9a9513c300d67b4b89c12c8466621c8, type: 3}
+      propertyPath: falloffExponent
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8996529731388072923, guid: f9a9513c300d67b4b89c12c8466621c8, type: 3}
       propertyPath: greenZoneWidth01
       value: 0.05
       objectReference: {fileID: 0}

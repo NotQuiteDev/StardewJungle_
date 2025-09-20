@@ -220,7 +220,8 @@ public class CropManager : MonoBehaviour, IInteractable
 
     private void CheckDeathCondition()
     {
-        if (CurrentWaterAmount <= minWaterAmount || CurrentWaterAmount >= maxWaterAmount)
+        // 물이 최소치보다 적거나 같을 때만 죽도록 조건을 변경한다.
+        if (CurrentWaterAmount <= minWaterAmount)
         {
             Die();
         }
@@ -231,6 +232,8 @@ public class CropManager : MonoBehaviour, IInteractable
         if (State == CropState.Growing)
         {
             CurrentWaterAmount += amount;
+            // 물을 준 후에, 최대 수분량을 넘지 않도록 값을 제한(Clamp)한다.
+            CurrentWaterAmount = Mathf.Min(CurrentWaterAmount, maxWaterAmount);
         }
     }
 
