@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
     // ## 추가된 부분: 움직임 잠금 상태 ##
     private bool isMovementLocked = false;
+    private bool isPaused = false;
 
     [Header("이동 설정 (Movement Settings)")]
     [SerializeField] private float moveSpeed = 5f;
@@ -99,6 +100,7 @@ public class PlayerMovement : MonoBehaviour
         attackAction.performed += OnAttackPerformed;
         playerControls.Player.Focusing.started += OnFocusingStarted;
         playerControls.Player.Focusing.canceled += OnFocusingCanceled;
+        GameManager.OnGameStateChanged += OnGameStateChanged;
     }
 
     private void OnDisable()
@@ -111,10 +113,12 @@ public class PlayerMovement : MonoBehaviour
         attackAction.performed -= OnAttackPerformed;
         playerControls.Player.Focusing.started -= OnFocusingStarted;
         playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
+        GameManager.OnGameStateChanged -= OnGameStateChanged;
     }
 
     private void Update()
     {
+        if (isPaused) return;
         if (isMovementLocked) return; // 잠금 상태면 실행 중지
 
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -146,6 +150,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isPaused) return;
         if (isMovementLocked) return; // 잠금 상태면 실행 중지
 
         if (jumpBufferCounter > 0 && coyoteTimeCounter > 0f)
@@ -187,11 +192,11 @@ public class PlayerMovement : MonoBehaviour
     {
         moveInput = playerControls.Player.Move.ReadValue<Vector2>();
     }
-    
+
     // ==========================================================
     // ## 아래에 누락되었던 함수 정의들이 모두 포함되었습니다. ##
     // ==========================================================
-    
+
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
         if (isMovementLocked) return;
@@ -200,7 +205,7 @@ public class PlayerMovement : MonoBehaviour
         if (currentItem is WateringCanData || currentItem is TillingHoeData) return;
         currentItem.Use(inventoryManager.equipPoint, cameraTransform);
     }
-    
+
     private void OnJumpPerformed(InputAction.CallbackContext context)
     {
         if (isMovementLocked) return;
@@ -226,7 +231,7 @@ public class PlayerMovement : MonoBehaviour
         isAiming = false;
         SetMaterialsTransparent(false); // <<< 이 함수가 누락되었었습니다.
     }
-    
+
     private void OnAttackStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
         if (isMovementLocked) return;
@@ -304,8 +309,8 @@ public class PlayerMovement : MonoBehaviour
     private void MovePlayer()
     {
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
-        Vector3 camRight   = new Vector3(cameraTransform.right.x,  0f, cameraTransform.right.z).normalized;
-        
+        Vector3 camRight = new Vector3(cameraTransform.right.x, 0f, cameraTransform.right.z).normalized;
+
         moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
         if (canRotate)
@@ -338,14 +343,14 @@ public class PlayerMovement : MonoBehaviour
     public void LockMovement()
     {
         isMovementLocked = true;
-        
+
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             rb.isKinematic = true;
         }
-        
+
         moveInput = Vector2.zero;
         isAttacking = false;
         isAiming = false;
@@ -354,11 +359,15 @@ public class PlayerMovement : MonoBehaviour
     public void UnlockMovement()
     {
         isMovementLocked = false;
-        
+
         if (rb != null)
         {
             rb.isKinematic = false;
         }
+    }
+    private void OnGameStateChanged(GameManager.GameState newState)
+    {
+        isPaused = (newState == GameManager.GameState.UI);
     }
 
     #endregion
