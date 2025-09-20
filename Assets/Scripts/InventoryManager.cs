@@ -24,10 +24,18 @@ public class InventoryManager : MonoBehaviour
     public Transform equipPoint;
     private GameObject currentEquippedItem;
 
+    // ## 추가: 아이템 드랍 설정 ##
+    [Header("아이템 드랍 설정")]
+    [Tooltip("바닥에 생성될 아이템 드랍 프리팹 (ItemDropShell)")]
+    [SerializeField] private GameObject itemDropPrefab;
+    [Tooltip("아이템을 앞으로 밀어내는 힘")]
+    [SerializeField] private float dropForce = 3f;
+
     private PlayerInput playerInput;
     private InputAction quickSlotSelectAction;
     private InputAction previousAction;
     private InputAction nextAction;
+    private InputAction dropItemAction; // ## 추가 ##
     private int currentFocusIndex = 0;
 
     [Header("수량(스택)")]
@@ -52,6 +60,7 @@ public class InventoryManager : MonoBehaviour
         quickSlotSelectAction = playerInput.actions.FindAction("QuickSlotSelect");
         previousAction = playerInput.actions.FindAction("Previous");
         nextAction = playerInput.actions.FindAction("Next");
+        dropItemAction = playerInput.actions.FindAction("DropItem"); // ## 추가: DropItem 액션 찾기 ##
     }
 
     void OnEnable()
@@ -59,11 +68,13 @@ public class InventoryManager : MonoBehaviour
         quickSlotSelectAction.performed += SelectFocusByNumber;
         previousAction.performed += _ => ChangeFocusByStep(-1);
         nextAction.performed += _ => ChangeFocusByStep(1);
+        dropItemAction.performed += DropFocusedItem; // ## 추가: DropItem 액션 구독 ##
     }
 
     void OnDisable()
     {
         quickSlotSelectAction.performed -= SelectFocusByNumber;
+        dropItemAction.performed -= DropFocusedItem; // ## 추가: 구독 해제 ##
     }
 
     void Start()
@@ -252,7 +263,7 @@ public class InventoryManager : MonoBehaviour
                         // 현재 장착된 아이템이 판매한 아이템이면 장착 해제
                         if (i == currentFocusIndex)
                         {
-                            EquipItem(i); 
+                            EquipItem(i);
                         }
                     }
                     UpdateAllSlotIcons(); // UI 갱신
@@ -261,11 +272,46 @@ public class InventoryManager : MonoBehaviour
                 else
                 {
                     // 수량이 부족하면 실패
-                    return false; 
+                    return false;
                 }
             }
         }
         return false; // 해당 아이템이 인벤토리에 없음
+    }
+    /// <summary>
+    /// ## 추가: 현재 들고 있는 아이템을 바닥에 드랍하는 함수 ##
+    /// </summary>
+    private void DropFocusedItem(InputAction.CallbackContext context)
+    {
+        // 1. 현재 들고 있는 아이템 정보 가져오기
+        ItemData itemToDrop = GetCurrentFocusedItem();
+        if (itemToDrop == null) return; // 빈 슬롯이면 아무것도 안 함
+
+        // 2. 드랍 프리팹이 설정되었는지 확인
+        if (itemDropPrefab == null)
+        {
+            Debug.LogError("Item Drop Prefab이 InventoryManager에 연결되지 않았습니다!");
+            return;
+        }
+
+        // 3. 아이템 생성 위치 계산 (플레이어 정면 살짝 위)
+        Vector3 spawnPosition = equipPoint.position + equipPoint.forward * 1.0f;
+
+        // 4. 아이템 드랍 프리팹 생성
+        GameObject dropInstance = Instantiate(itemDropPrefab, spawnPosition, Quaternion.identity);
+
+        // 5. 생성된 아이템에 정보 주입 (어떤 아이템인지, 1개인지)
+        dropInstance.GetComponent<ItemDrop>().Initialize(itemToDrop, 1);
+        
+        // 6. 생성된 아이템에 물리적 힘을 가해 앞으로 던지기
+        Rigidbody rb = dropInstance.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.AddForce(equipPoint.forward * dropForce, ForceMode.Impulse);
+        }
+
+        // 7. 인벤토리에서 아이템 1개 소모
+        ConsumeFocusedItem(1);
     }
 
 }
