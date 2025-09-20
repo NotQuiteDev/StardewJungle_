@@ -57,6 +57,10 @@ PrefabInstance:
       value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: itemDropPrefab
+      value: 
+      objectReference: {fileID: 5604226665565553027, guid: 5b11b6cbd307da44bb53e48e52f9fcb8, type: 3}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: maxWaterAmount
       value: 2000
       objectReference: {fileID: 0}
@@ -81,12 +85,48 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: initialWaterAmountInspector
       value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: optimalWaterAmountInspector
       value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[0].gradeName
+      value: Gold
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[1].gradeName
+      value: Silver
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[2].gradeName
+      value: Copper
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[0].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[1].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[2].cropItemToDrop
+      value: 
+      objectReference: {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[0].minScoreRequired
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[1].minScoreRequired
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 6207681443559674889, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

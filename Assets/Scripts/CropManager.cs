@@ -1,6 +1,14 @@
 using UnityEngine;
 
 // IInteractable 인터페이스를 따른다고 선언
+
+[System.Serializable]
+public struct HarvestGrade
+{
+    public string gradeName; // Inspector에서 알아보기 위한 이름 (예: Gold)
+    public float minScoreRequired; // 이 등급을 받기 위한 최소 점수
+    public HarvestedCropData cropItemToDrop; // 해당 등급일 때 드랍할 아이템
+}
 public class CropManager : MonoBehaviour, IInteractable
 {
     public enum CropState { Growing, Grown, Dead }
@@ -37,6 +45,14 @@ public class CropManager : MonoBehaviour, IInteractable
 
     [Tooltip("그린존 밖 감쇠 곡선. 1=선형, 2=부드럽게(권장), 3~4=더 관대")]
     [SerializeField, Range(0.5f, 4f)] private float falloffExponent = 2.0f;
+
+    // ## 2. Header("오브젝트 연결") 아래에 이 두 변수를 추가합니다. ##
+    [Header("수확 및 드랍 설정")]
+    [Tooltip("수확 시 생성될 '만능' 드랍 아이템 프리팹 (ItemDropShell)")]
+    [SerializeField] private GameObject itemDropPrefab;
+
+    [Tooltip("점수가 높은 순서대로(내림차순) 정렬해주세요!")]
+    [SerializeField] private HarvestGrade[] harvestGrades;
 
     // UI/외부에서 읽기용
     public float GreenZoneWidth01 => greenZoneWidth01;
@@ -231,6 +247,7 @@ public class CropManager : MonoBehaviour, IInteractable
     }
 
     // 수확/제거 둘 다 플롯 50% 강등
+ // CropManager.cs 의 Interact() 함수
     public void Interact()
     {
         var plot = GetComponentInParent<FarmPlot>();
@@ -239,12 +256,44 @@ public class CropManager : MonoBehaviour, IInteractable
         {
             case CropState.Grown:
                 if (plot != null) plot.OnHarvestedReduceToHalf();
-                Debug.Log($"작물을 수확했습니다! 최종 점수: {Mathf.FloorToInt(CurrentScorePercent)}점");
+
+                // ## 수확 로직 시작 ##
+                float finalScore = CurrentScorePercent;
+                HarvestedCropData itemToDrop = null;
+
+                // 점수가 높은 순으로 정렬된 등급 배열을 순회
+                foreach (var grade in harvestGrades)
+                {
+                    if (finalScore >= grade.minScoreRequired)
+                    {
+                        itemToDrop = grade.cropItemToDrop;
+                        break; // 가장 먼저 조건을 만족하는 최상위 등급을 선택하고 종료
+                    }
+                }
+
+                // 적절한 등급의 아이템을 찾았다면 드랍
+                if (itemToDrop != null)
+                {
+                    Debug.Log($"작물을 수확했습니다! 최종 점수: {Mathf.FloorToInt(finalScore)}점, 등급: {itemToDrop.itemName}");
+
+                    if (itemDropPrefab != null)
+                    {
+                        // ItemDropShell 프리팹을 작물의 위치에 생성
+                        GameObject drop = Instantiate(itemDropPrefab, transform.position, Quaternion.identity);
+                        // 어떤 아이템인지, 몇 개인지 정보를 주입
+                        drop.GetComponent<ItemDrop>().Initialize(itemToDrop, 1); // 1개 드랍
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("수확 가능한 아이템이 없습니다. harvestGrades 설정을 확인하세요.");
+                }
+                
                 Destroy(gameObject);
                 break;
 
             case CropState.Dead:
-                if (plot != null) plot.OnHarvestedReduceToHalf(); // ★ 죽은 작물 제거도 50%
+                if (plot != null) plot.OnHarvestedReduceToHalf();
                 Debug.Log("죽은 작물을 제거했습니다.");
                 Destroy(gameObject);
                 break;
@@ -260,8 +309,8 @@ public class CropManager : MonoBehaviour, IInteractable
         switch (State)
         {
             case CropState.Grown: return "Harvest";
-            case CropState.Dead:  return "Clear";
-            default:              return "";
+            case CropState.Dead: return "Clear";
+            default: return "";
         }
     }
 

@@ -165,7 +165,7 @@ public class PlayerMovement : MonoBehaviour
 
     #region 커스텀 함수 (Custom Methods)
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter(Collider other)
     {
         // 부딪힌 오브젝트에 ItemDrop 스크립트가 있는지 확인
         ItemDrop itemDrop = other.GetComponent<ItemDrop>();
