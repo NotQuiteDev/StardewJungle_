@@ -165,6 +165,24 @@ public class PlayerMovement : MonoBehaviour
 
     #region 커스텀 함수 (Custom Methods)
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // 부딪힌 오브젝트에 ItemDrop 스크립트가 있는지 확인
+        ItemDrop itemDrop = other.GetComponent<ItemDrop>();
+        if (itemDrop != null)
+        {
+            // InventoryManager에 아이템을 추가해달라고 요청
+            bool success = inventoryManager.AddItem(itemDrop.itemData, itemDrop.count);
+
+            // 인벤토리에 성공적으로 추가되었다면
+            if (success)
+            {
+                // 바닥에 있던 아이템 오브젝트를 파괴
+                Destroy(other.gameObject);
+            }
+        }
+    }
+
     private void ProcessInput()
     {
         moveInput = playerControls.Player.Move.ReadValue<Vector2>();
