@@ -25,7 +25,7 @@ public class InteractionUIController : MonoBehaviour
 
     private CanvasGroup statusCanvasGroup;
 
-    private enum TargetMode { None, Crop, FarmPlot, Bed }
+    private enum TargetMode { None, Crop, FarmPlot, Bed, GenericNPC }
     private TargetMode _mode = TargetMode.None;
 
     private void Awake()
@@ -83,6 +83,14 @@ public class InteractionUIController : MonoBehaviour
                 UpdateBedUI(bed);
                 return;
             }
+            InteractableNPC npc = hit.collider.GetComponentInParent<InteractableNPC>();
+            if (npc != null)
+            {
+                SetMode(TargetMode.GenericNPC);
+                statusCanvasGroup.alpha = 1f;
+                UpdateGenericNPCUI(npc); // 새로 만든 함수 호출
+                return;
+            }
         }
 
         // 감지 대상 없음
@@ -118,6 +126,14 @@ public class InteractionUIController : MonoBehaviour
             case TargetMode.Bed:
                 if (normalStatusGroup) normalStatusGroup.SetActive(false); // 슬라이더류 OFF
                 if (statusMessageText) statusMessageText.gameObject.SetActive(true);
+                if (modeLabelText) modeLabelText.gameObject.SetActive(false);
+                if (growthSlider) growthSlider.gameObject.SetActive(false);
+                if (tilledSlider) tilledSlider.gameObject.SetActive(false);
+                break;
+            // ## 추가 ## : 범용 NPC를 위한 UI 레이아웃 설정 (Bed와 동일)
+            case TargetMode.GenericNPC:
+                if (normalStatusGroup) normalStatusGroup.SetActive(false); // 슬라이더 그룹 끄기
+                if (statusMessageText) statusMessageText.gameObject.SetActive(true); // 메시지 텍스트 켜기
                 if (modeLabelText) modeLabelText.gameObject.SetActive(false);
                 if (growthSlider) growthSlider.gameObject.SetActive(false);
                 if (tilledSlider) tilledSlider.gameObject.SetActive(false);
@@ -181,5 +197,11 @@ public class InteractionUIController : MonoBehaviour
     {
         if (statusMessageText)
             statusMessageText.text = bed.GetInteractionText();
+    }
+
+    private void UpdateGenericNPCUI(InteractableNPC npc)
+    {
+        if (statusMessageText)
+            statusMessageText.text = npc.GetInteractionText();
     }
 }
