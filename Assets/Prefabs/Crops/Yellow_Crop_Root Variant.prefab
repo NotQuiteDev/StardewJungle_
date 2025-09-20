@@ -26,7 +26,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: waterLossPerSecond
-      value: 0.6
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: initialWaterAmountInspector
