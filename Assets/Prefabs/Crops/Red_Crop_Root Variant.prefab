@@ -65,12 +65,24 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: falloffExponent
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: waterLossPerSecond
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: overrideInitialWater
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: overrideOptimalWater
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: initialWaterAmountInspector
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: optimalWaterAmountInspector

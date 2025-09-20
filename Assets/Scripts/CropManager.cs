@@ -25,6 +25,11 @@ public class CropManager : MonoBehaviour, IInteractable
     [Tooltip("overrideOptimalWater가 true일 때만 사용됨. [min, max] 범위로 자동 클램프")]
     [SerializeField] private float optimalWaterAmountInspector = 50f;
 
+    [Header("초기 수분 설정 (심을 때)")]
+    [Tooltip("체크하면 초기 수분을 Inspector 값으로 강제. 끄면 기본은 '최적 수분'에서 시작")]
+    [SerializeField] private bool overrideInitialWater = false;
+    [Tooltip("overrideInitialWater가 true일 때만 사용됨. [min, max] 범위로 자동 클램프")]
+    [SerializeField] private float initialWaterAmountInspector = 50f;
 
     [Header("점수 튜닝 (Green Zone)")]
     [Tooltip("Min~Max 전체 범위 대비 '완벽 구간' 폭 비율 (0~1). 예: 0.2 = 전체의 20% 폭은 100점 처리")]
@@ -62,6 +67,10 @@ public class CropManager : MonoBehaviour, IInteractable
     public float CurrentScorePercent
         => Mathf.Clamp01(qualityAccum / Mathf.Max(1e-4f, growthDuration)) * 100f;
 
+    // 런타임으로 초기 수분 주입을 지원하기 위한 임시 저장소
+    private bool hasPendingInitialWater = false;
+    private float pendingInitialWater = 0f;
+
     private void Awake()
     {
         if (cropVisuals == null)
@@ -88,7 +97,20 @@ public class CropManager : MonoBehaviour, IInteractable
         normRangeFromOptimal = Mathf.Max(1e-4f,
             Mathf.Min(optimalWaterAmount - minWaterAmount, maxWaterAmount - optimalWaterAmount));
 
-        CurrentWaterAmount = optimalWaterAmount; // 시작은 최적치
+        // ★ 초기 수분 설정
+        if (hasPendingInitialWater)
+        {
+            CurrentWaterAmount = Mathf.Clamp(pendingInitialWater, minWaterAmount, maxWaterAmount);
+            hasPendingInitialWater = false; // 1회성 적용
+        }
+        else if (overrideInitialWater)
+        {
+            CurrentWaterAmount = Mathf.Clamp(initialWaterAmountInspector, minWaterAmount, maxWaterAmount);
+        }
+        else
+        {
+            CurrentWaterAmount = optimalWaterAmount; // 기본은 최적치에서 시작
+        }
     }
 
     private void Update()
@@ -111,34 +133,27 @@ public class CropManager : MonoBehaviour, IInteractable
         UpdateScore();
         CheckDeathCondition();
 
-
-        // --- 맨 아래에 추가 ---
+        // ## 수정된 부분: 디버그 로그 ##
+        // =======================================================================
         _dbgTimer += Time.deltaTime;
         if (debugWaterEverySecond && _dbgTimer >= 1f)
         {
             _dbgTimer = 0f;
 
-            // 정규화 값 계산(0..1)
-            float pMin = 0f;
-            float pMax = 1f;
-            float pCur = Mathf.Clamp01(Mathf.InverseLerp(minWaterAmount, maxWaterAmount, CurrentWaterAmount));
-            float pOpt = Mathf.Clamp01(Mathf.InverseLerp(minWaterAmount, maxWaterAmount, optimalWaterAmount));
+            // 핵심 정보 계산
+            float grownPct = Mathf.Clamp01(growthTimer / Mathf.Max(1e-4f, growthDuration)) * 100f;
+            float scoreAsOfNow = (qualityAccum / Mathf.Max(1e-4f, growthTimer)) * 100f;
 
-            // 그린존 좌/우 경계(정규화)
-            float half = Mathf.Clamp01(greenZoneWidth01) * 0.5f;
-            float pL = Mathf.Clamp01(pOpt - half);
-            float pR = Mathf.Clamp01(pOpt + half);
-
+            // 간결하게 로그 출력
             Debug.Log(
-                $"[CropDebug] Water: {CurrentWaterAmount:F1} (norm {pCur:F2}) | " +
-                $"Min/Max: {minWaterAmount}/{maxWaterAmount} | " +
-                $"Optimal: {optimalWaterAmount} (norm {pOpt:F2}) | " +
-                $"Green[{pL:F2}..{pR:F2}] width={greenZoneWidth01:P0} | " +
-                $"Score={CurrentScore:F1}",
+                $"[Crop] Water: {CurrentWaterAmount:F1} | " +
+                $"Growth: {grownPct:F0}% ({growthTimer:F1}s) | " +
+                $"Score(Now): {scoreAsOfNow:F1}",
                 this
             );
         }
     }
+
     /// <summary>
     /// UI가 바로 쓸 수 있는 정규화 값(0..1)들 반환:
     /// pCur=현재, pOpt=최적, pL/pR=그린존 좌/우.
@@ -154,46 +169,35 @@ public class CropManager : MonoBehaviour, IInteractable
 
     private void UpdateScore()
     {
-        // 범위/최적치 파생값
         float min = minWaterAmount;
         float max = maxWaterAmount;
         float opt = optimalWaterAmount;
 
         float span = Mathf.Max(1e-4f, max - min);
-        float left = opt - min; // 최적→왼쪽 경계 거리
-        float right = max - opt; // 최적→오른쪽 경계 거리
+        float left = opt - min;      // 최적→왼쪽 경계 거리
+        float right = max - opt;     // 최적→오른쪽 경계 거리
 
-        // 그린존(완벽 구간) 절반폭: 전체 범위 비율 * 0.5
         float greenHalf = Mathf.Clamp01(greenZoneWidth01) * 0.5f * span;
 
-        // 현재 값이 최적에서 얼마나 떨어졌는가
         float delta = Mathf.Abs(CurrentWaterAmount - opt);
 
-        float quality; // 0~1
+        float quality; // 0..1
 
         if (delta <= greenHalf)
         {
-            // 그린존 내부: 100% 품질
             quality = 1f;
         }
         else
         {
-            // 그린존 밖: 초과량을 측면별 실제 남은 거리로 정규화해 감쇠
             float over = delta - greenHalf;
-
-            // 오른쪽/왼쪽 측면별 유효 분모(그린존 제외 후 남은 거리)
             float denom = (CurrentWaterAmount >= opt)
                 ? Mathf.Max(1e-4f, right - greenHalf)
                 : Mathf.Max(1e-4f, left - greenHalf);
 
-            // 0..1: 그린존 경계에서 실제 경계까지
             float t = Mathf.Clamp01(over / denom);
-
-            // 감쇠 곡선: 1 - t^e  (e가 클수록 초반 완만, 더 관대)
             quality = 1f - Mathf.Pow(t, falloffExponent);
         }
 
-        // 시간 적분(성장 중에만 호출됨) → 0~100으로 정규화
         qualityAccum += quality * Time.deltaTime;
         CurrentScore = Mathf.Clamp01(qualityAccum / Mathf.Max(1e-4f, growthDuration)) * 100f;
     }
@@ -259,5 +263,26 @@ public class CropManager : MonoBehaviour, IInteractable
             case CropState.Dead:  return "Clear";
             default:              return "";
         }
+    }
+
+    // ===== Runtime API: 심기 직전 원하는 초기 수분 주입 =====
+
+    /// <summary>
+    /// 절대 수치로 초기 수분을 지정(심기 직전 호출 권장). [min,max]로 자동 클램프.
+    /// </summary>
+    public void SetInitialWaterAbsolute(float waterAmount)
+    {
+        pendingInitialWater = waterAmount;
+        hasPendingInitialWater = true;
+    }
+
+    /// <summary>
+    /// 0..1 정규화 비율로 초기 수분을 지정. 0=min, 1=max.
+    /// </summary>
+    public void SetInitialWaterNormalized(float t01)
+    {
+        t01 = Mathf.Clamp01(t01);
+        float abs = Mathf.Lerp(minWaterAmount, maxWaterAmount, t01);
+        SetInitialWaterAbsolute(abs);
     }
 }
