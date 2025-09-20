@@ -13,12 +13,20 @@ PrefabInstance:
       value: Yellow_Crop_Root Variant
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
+      propertyPath: growthDuration
+      value: 1800
+      objectReference: {fileID: 0}
+    - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: maxWaterAmount
-      value: 2500
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
+      propertyPath: greenZoneWidth01
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: waterLossPerSecond
-      value: 10
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: initialWaterAmountInspector
@@ -26,7 +34,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: optimalWaterAmountInspector
-      value: 1250
+      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 636069322761461187, guid: 05f216497411bcd4298a50c83079feaf, type: 3}
       propertyPath: harvestGrades.Array.data[0].cropItemToDrop

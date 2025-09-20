@@ -4255,7 +4255,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 7, y: -25}
+  m_AnchoredPosition: {x: -101, y: -25}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1221516456
@@ -4320,7 +4320,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 4
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -5678,11 +5678,11 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: fac3fc7619b798b45b5ee9ce42af9c22, type: 2}
     price: 200
   - item: {fileID: 11400000, guid: a0caf81554eb2064ea53020429d2641a, type: 2}
-    price: 500
+    price: 5000
   - item: {fileID: 11400000, guid: 4ec9276398cbdac44a1c366b27c65512, type: 2}
-    price: 100
+    price: 0
   - item: {fileID: 11400000, guid: f6431dca928a9aa4aa7060527ef439ea, type: 2}
-    price: 100
+    price: 0
 --- !u!136 &1457752893
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6455,7 +6455,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 4
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -6516,7 +6516,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 7, y: -61.300003}
+  m_AnchoredPosition: {x: -102, y: -61.300003}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1543051389

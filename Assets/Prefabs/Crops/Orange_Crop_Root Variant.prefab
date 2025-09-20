@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: maxWaterAmount
-      value: 1500
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: falloffExponent
@@ -70,15 +70,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: waterLossPerSecond
-      value: 5
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: initialWaterAmountInspector
-      value: 150
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: optimalWaterAmountInspector
-      value: 1050
+      value: 700
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: harvestGrades.Array.data[0].cropItemToDrop
@@ -92,6 +92,10 @@ PrefabInstance:
       propertyPath: harvestGrades.Array.data[2].cropItemToDrop
       value: 
       objectReference: {fileID: 11400000, guid: 147027a1fd5411449a6f6ae99134fe4d, type: 2}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: harvestGrades.Array.data[0].minScoreRequired
+      value: 90
+      objectReference: {fileID: 0}
     - target: {fileID: 6207681443559674889, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
