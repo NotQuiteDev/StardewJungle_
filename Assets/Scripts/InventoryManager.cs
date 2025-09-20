@@ -1,7 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using TMPro; // ## 1. TextMeshPro 사용을 위해 추가 ##
 
 public class InventoryManager : MonoBehaviour
 {
@@ -11,12 +13,15 @@ public class InventoryManager : MonoBehaviour
     [Header("UI 관련")]
     public GameObject[] quickSlotsUI;
     public GameObject focusUI;
+    
+    // ## 2. 배열 타입을 TextMeshProUGUI로 수정 ##
+    [Tooltip("각 퀵슬롯 UI 자식에 있는 TextMeshPro 텍스트를 순서대로 연결하세요.")]
+    public TextMeshProUGUI[] countTexts = new TextMeshProUGUI[10];
 
     [Header("플레이어 장착 관련")]
     public Transform equipPoint;
     private GameObject currentEquippedItem;
 
-    // --- 입력 시스템 변수 ---
     private PlayerInput playerInput;
     private InputAction quickSlotSelectAction;
     private InputAction previousAction;
@@ -24,7 +29,7 @@ public class InventoryManager : MonoBehaviour
     private int currentFocusIndex = 0;
 
     [Header("수량(스택)")]
-    [SerializeField] private int[] slotCounts = new int[10]; // 슬롯 수와 동일 크기
+    [SerializeField] private int[] slotCounts = new int[10];
 
 
     void Awake()
@@ -45,22 +50,23 @@ public class InventoryManager : MonoBehaviour
     void OnDisable()
     {
         quickSlotSelectAction.performed -= SelectFocusByNumber;
-        previousAction.performed -= _ => ChangeFocusByStep(-1);
-        nextAction.performed -= _ => ChangeFocusByStep(1);
     }
 
     void Start()
     {
         StartCoroutine(InitializeFocusPosition());
-        // 데이터가 있고 카운트가 0이면 1로
-        for (int i = 0; i < inventorySlotsData.Length; i++)
-            if (inventorySlotsData[i] != null && slotCounts[i] <= 0) slotCounts[i] = 1;
 
+        for (int i = 0; i < inventorySlotsData.Length; i++)
+        {
+            if (inventorySlotsData[i] != null && slotCounts[i] <= 0)
+            {
+                slotCounts[i] = 1;
+            }
+        }
         UpdateAllSlotIcons();
         EquipItem(currentFocusIndex);
     }
-
-    // 아이콘을 업데이트하는 함수 (수정된 부분!)
+    
     private void UpdateAllSlotIcons()
     {
         for (int i = 0; i < quickSlotsUI.Length; i++)
@@ -69,20 +75,12 @@ public class InventoryManager : MonoBehaviour
             if (iconTransform == null) continue;
 
             var iconImage = iconTransform.GetComponent<Image>();
-            var countTextTr = quickSlotsUI[i].transform.Find("Count"); // TextMeshProUGUI 추천 (없으면 null)
-            Text countText = countTextTr ? countTextTr.GetComponent<Text>() : null;
-            // (Text 대신 TMP를 쓰면 타입만 바꾸세요)
-
             var data = (i < inventorySlotsData.Length) ? inventorySlotsData[i] : null;
 
             if (data != null && data.itemIcon != null)
             {
                 iconImage.sprite = data.itemIcon;
-
-                // ★ 씨앗이면 틴트, 아니면 흰색
-                if (data is SeedData sd) iconImage.color = sd.iconTint;
-                else iconImage.color = Color.white;
-
+                iconImage.color = (data is SeedData sd) ? sd.iconTint : Color.white;
                 iconImage.enabled = true;
             }
             else
@@ -90,33 +88,40 @@ public class InventoryManager : MonoBehaviour
                 iconImage.sprite = null;
                 iconImage.enabled = false;
             }
+            
+            int count = (i < slotCounts.Length) ? slotCounts[i] : 0;
+            // ## 변수 타입을 TextMeshProUGUI로 수정 ##
+            TextMeshProUGUI currentCountText = (i < countTexts.Length) ? countTexts[i] : null;
 
-            // 수량 표시 (선택)
-            int cnt = (i < slotCounts.Length) ? slotCounts[i] : 0;
-            if (countText != null)
+            if (currentCountText != null)
             {
-                countText.text = (data != null && cnt > 1) ? cnt.ToString() : ""; // 1 이하면 비움
+                if (data != null && count > 1)
+                {
+                    currentCountText.text = count.ToString();
+                    currentCountText.enabled = true;
+                }
+                else
+                {
+                    currentCountText.text = "";
+                    currentCountText.enabled = false;
+                }
             }
         }
     }
-
+    
     public bool ConsumeFocusedItem(int amount)
     {
         int idx = currentFocusIndex;
-        if (idx < 0 || idx >= inventorySlotsData.Length) return false;
-        if (inventorySlotsData[idx] == null) return false;
+        if (idx < 0 || idx >= inventorySlotsData.Length || inventorySlotsData[idx] == null) return false;
 
-        int have = slotCounts[idx];
-        if (have < amount) return false;
+        if (slotCounts[idx] < amount) return false;
 
-        slotCounts[idx] = have - amount;
+        slotCounts[idx] -= amount;
 
         if (slotCounts[idx] <= 0)
         {
-            // 아이템 소진 → 슬롯 비움 + 장착 해제
             slotCounts[idx] = 0;
             inventorySlotsData[idx] = null;
-
             if (currentEquippedItem != null)
             {
                 Destroy(currentEquippedItem);
@@ -125,11 +130,10 @@ public class InventoryManager : MonoBehaviour
         }
 
         UpdateAllSlotIcons();
-        // 장착 오브젝트는 data가 null이면 자연히 없음. 안전하게 일치시킬려면:
         EquipItem(currentFocusIndex);
         return true;
     }
-
+    
     private void UpdateFocusPosition()
     {
         if (currentFocusIndex >= 0 && currentFocusIndex < quickSlotsUI.Length)
@@ -161,7 +165,6 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
     
-    // --- 아래는 기존 포커스 이동 관련 함수들 (수정 없음) ---
     private IEnumerator InitializeFocusPosition()
     {
         yield return new WaitForEndOfFrame();
