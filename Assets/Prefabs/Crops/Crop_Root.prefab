@@ -199,16 +199,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cropVisuals: {fileID: 1449100938482993106}
-  growthDuration: 50
+  growthDuration: 1200
   startScale: {x: 0.1, y: 0.1, z: 0.1}
   maxScale: {x: 1, y: 1, z: 1}
-  minWaterAmount: 1600
-  maxWaterAmount: 3200
-  waterLossPerSecond: 20
-  overrideOptimalWater: 0
-  optimalWaterAmountInspector: 50
+  minWaterAmount: 1
+  maxWaterAmount: 2000
+  waterLossPerSecond: 2
+  overrideOptimalWater: 1
+  optimalWaterAmountInspector: 1500
+  overrideInitialWater: 1
+  initialWaterAmountInspector: 50
   greenZoneWidth01: 0.15
-  falloffExponent: 1
+  falloffExponent: 0.8
+  itemDropPrefab: {fileID: 5604226665565553027, guid: 5b11b6cbd307da44bb53e48e52f9fcb8, type: 3}
+  harvestGrades:
+  - gradeName: Gold
+    minScoreRequired: 80
+    cropItemToDrop: {fileID: 0}
+  - gradeName: Silver
+    minScoreRequired: 60
+    cropItemToDrop: {fileID: 0}
+  - gradeName: Coper
+    minScoreRequired: 0
+    cropItemToDrop: {fileID: 0}
   debugWaterEverySecond: 1
   qualityAccum: 0
 --- !u!65 &313523615387598

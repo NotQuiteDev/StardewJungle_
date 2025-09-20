@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b8988dc1b79cbb49ad9106de027446a, type: 3}
+  m_Name: Purple_regular
+  m_EditorClassIdentifier: 
+  itemName: Purple Crop
+  itemIcon: {fileID: 21300000, guid: 6c15d8b9cf196af4f94e22d5627e1ed3, type: 3}
+  itemPrefab: {fileID: 966922665714506520, guid: 14b5ee57a2abfaf47b5f30ee7c66e06d, type: 3}
+  sellPrice: 1000
