@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: growthDuration
-      value: 120
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: maxWaterAmount
@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: waterLossPerSecond
-      value: 10
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: overrideOptimalWater

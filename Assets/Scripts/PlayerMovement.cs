@@ -8,6 +8,9 @@ public class PlayerMovement : MonoBehaviour
 {
     #region 변수 (Variables)
 
+    // ## 추가된 부분: 움직임 잠금 상태 ##
+    private bool isMovementLocked = false;
+
     [Header("이동 설정 (Movement Settings)")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float airMultiplier = 0.8f;
@@ -52,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
 
     private InventoryManager inventoryManager;
     private InputAction attackAction;
-    private bool isAttacking = false;   
+    private bool isAttacking = false;
 
     // --- 외부 제어용 변수 ---
     public bool canRotate = true;
@@ -71,7 +74,7 @@ public class PlayerMovement : MonoBehaviour
         playerControls = new InputSystem_Actions();
 
         inventoryManager = GetComponent<InventoryManager>();
-        attackAction = playerControls.Player.Attack; // Attack 액션 찾아오기
+        attackAction = playerControls.Player.Attack;
 
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers)
@@ -89,11 +92,8 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         playerControls.Player.Enable();
-        // ▼▼▼ 수정된 부분: Jump 액션의 performed와 canceled 이벤트를 모두 구독 ▼▼▼
         playerControls.Player.Jump.performed += OnJumpPerformed;
         playerControls.Player.Jump.canceled += OnJumpCanceled;
-        // ▲▲▲ 수정된 부분 ▲▲▲
-        // ★ 여기 추가: 홀드형 시작/종료
         attackAction.started += OnAttackStarted;
         attackAction.canceled += OnAttackCanceled;
         attackAction.performed += OnAttackPerformed;
@@ -104,39 +104,24 @@ public class PlayerMovement : MonoBehaviour
     private void OnDisable()
     {
         playerControls.Player.Disable();
-        // ▼▼▼ 수정된 부분: Jump 액션의 구독 해제 ▼▼▼
         playerControls.Player.Jump.performed -= OnJumpPerformed;
         playerControls.Player.Jump.canceled -= OnJumpCanceled;
-        // ▲▲▲ 수정된 부분 ▲▲▲
-        // ★ 여기 추가: 구독 해제
         attackAction.started -= OnAttackStarted;
         attackAction.canceled -= OnAttackCanceled;
-
-        // (선택)
         attackAction.performed -= OnAttackPerformed;
-
         playerControls.Player.Focusing.started -= OnFocusingStarted;
         playerControls.Player.Focusing.canceled -= OnFocusingCanceled;
     }
 
-    private void OnAttackPerformed(InputAction.CallbackContext context)
-    {
-        ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
-        if (currentItem == null) return;
-
-        // 단발 금지 도구는 제외
-        if (currentItem is WateringCanData || currentItem is TillingHoeData) return;
-
-        currentItem.Use(inventoryManager.equipPoint, cameraTransform);
-    }
-
     private void Update()
     {
+        if (isMovementLocked) return; // 잠금 상태면 실행 중지
+
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         isHittingHead = Physics.CheckSphere(headCheck.position, headRadius, groundMask);
 
         ProcessInput();
-        HandleTransparency();
+        HandleTransparency(); // <<< 이 함수가 누락되었었습니다.
 
         if (isGrounded && rb.linearVelocity.y < 0.1f)
         {
@@ -161,6 +146,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isMovementLocked) return; // 잠금 상태면 실행 중지
+
         if (jumpBufferCounter > 0 && coyoteTimeCounter > 0f)
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpInitialSpeed, rb.linearVelocity.z);
@@ -169,8 +156,8 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter = 0f;
         }
 
-        MovePlayer();
-        HandleJump();
+        MovePlayer(); // <<< 이 함수가 누락되었었습니다.
+        HandleJump(); // <<< 이 함수가 누락되었었습니다.
     }
 
     #endregion
@@ -182,29 +169,65 @@ public class PlayerMovement : MonoBehaviour
     {
         moveInput = playerControls.Player.Move.ReadValue<Vector2>();
     }
-
+    
+    // ==========================================================
+    // ## 아래에 누락되었던 함수 정의들이 모두 포함되었습니다. ##
+    // ==========================================================
+    
+    private void OnAttackPerformed(InputAction.CallbackContext context)
+    {
+        if (isMovementLocked) return;
+        ItemData currentItem = inventoryManager.GetCurrentFocusedItem();
+        if (currentItem == null) return;
+        if (currentItem is WateringCanData || currentItem is TillingHoeData) return;
+        currentItem.Use(inventoryManager.equipPoint, cameraTransform);
+    }
+    
     private void OnJumpPerformed(InputAction.CallbackContext context)
     {
+        if (isMovementLocked) return;
         jumpBufferCounter = jumpBufferTime;
     }
 
-    // ▼▼▼ 추가된 함수: 점프 버튼을 뗐을 때 isBoosting을 false로 만듦 ▼▼▼
     private void OnJumpCanceled(InputAction.CallbackContext context)
     {
+        if (isMovementLocked) return;
         isBoosting = false;
     }
-    // ▲▲▲ 추가된 함수 ▲▲▲
 
     private void OnFocusingStarted(InputAction.CallbackContext context)
     {
+        if (isMovementLocked) return;
         isAiming = true;
-        SetMaterialsTransparent(true);
+        SetMaterialsTransparent(true); // <<< 이 함수가 누락되었었습니다.
     }
 
     private void OnFocusingCanceled(InputAction.CallbackContext context)
     {
+        if (isMovementLocked) return;
         isAiming = false;
-        SetMaterialsTransparent(false);
+        SetMaterialsTransparent(false); // <<< 이 함수가 누락되었었습니다.
+    }
+    
+    private void OnAttackStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (isMovementLocked) return;
+        isAttacking = true;
+        ItemData item = inventoryManager.GetCurrentFocusedItem();
+        if (item == null) return;
+        item.BeginUse(inventoryManager.equipPoint, cameraTransform, this);
+    }
+
+    private void OnAttackCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (isMovementLocked) return;
+        isAttacking = false;
+        ItemData item = inventoryManager.GetCurrentFocusedItem();
+        if (item != null) item.EndUse();
+        var waterRuntime = GetComponent<WateringCanRuntime>();
+        if (waterRuntime != null) waterRuntime.StopWatering();
+        var hoeRuntime = GetComponent<TillingHoeRuntime>();
+        if (hoeRuntime != null) hoeRuntime.StopTilling();
     }
 
     private void HandleTransparency()
@@ -264,15 +287,12 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 camForward = new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z).normalized;
         Vector3 camRight   = new Vector3(cameraTransform.right.x,  0f, cameraTransform.right.z).normalized;
-
-        // 이동 방향은 항상 카메라 기준 WASD
+        
         moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
         if (canRotate)
         {
-            // ★ 조준중이거나 공격중이면 카메라를 바라본다
             Vector3 targetLookDirection = (isAiming || isAttacking) ? camForward : moveDirection;
-
             if (targetLookDirection.sqrMagnitude >= 0.01f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
@@ -293,33 +313,35 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = new Vector3(smoothedVelocity.x, rb.linearVelocity.y, smoothedVelocity.z);
     }
 
-    private void OnAttackStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    #endregion
+
+    #region 외부 제어 함수 (Public Control Methods)
+
+    public void LockMovement()
     {
-        isAttacking = true; // ★ 공격중 플래그 ON
-
-        ItemData item = inventoryManager.GetCurrentFocusedItem();
-        if (item == null) return;
-
-        // 홀드형 아이템 시작
-        item.BeginUse(inventoryManager.equipPoint, cameraTransform, this);
-    }
-
-    private void OnAttackCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
-    {
+        isMovementLocked = true;
+        
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+        }
+        
+        moveInput = Vector2.zero;
         isAttacking = false;
-
-        ItemData item = inventoryManager.GetCurrentFocusedItem();
-        if (item != null) item.EndUse();
-
-        // 워터링 정지
-        var waterRuntime = GetComponent<WateringCanRuntime>();
-        if (waterRuntime != null) waterRuntime.StopWatering();
-
-        // ★ 호(경작) 정지 – 이 줄이 없으면 계속 경작됨
-        var hoeRuntime = GetComponent<TillingHoeRuntime>();
-        if (hoeRuntime != null) hoeRuntime.StopTilling();
+        isAiming = false;
     }
 
+    public void UnlockMovement()
+    {
+        isMovementLocked = false;
+        
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+        }
+    }
 
     #endregion
 
@@ -339,4 +361,3 @@ public class PlayerMovement : MonoBehaviour
     }
 #endif
 }
-

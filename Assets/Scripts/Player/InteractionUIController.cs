@@ -18,20 +18,26 @@ public class InteractionUIController : MonoBehaviour
     [SerializeField] private Slider growthSlider;              // 성장 슬라이더
 
     [Header("FarmPlot: Tilled UI")]
-    [SerializeField] private Slider tilledSlider;              // 경작도 슬라이더
+    [SerializeField] private Slider tilledSlider;              // 경작도 슬라이더 (0..1)
 
     [Header("라벨 표시")]
-    [SerializeField] private TextMeshProUGUI modeLabelText;    // "Growth" 또는 "Tilled" 라벨
+    [SerializeField] private TextMeshProUGUI modeLabelText;    // "Growth" 또는 "Tilled"
 
     private CanvasGroup statusCanvasGroup;
 
-    private enum TargetMode { None, Crop, FarmPlot }
+    private enum TargetMode { None, Crop, FarmPlot, Bed }
     private TargetMode _mode = TargetMode.None;
 
     private void Awake()
     {
         if (raycastCamera == null) raycastCamera = Camera.main;
-        statusCanvasGroup = statusWindowGroup.GetComponent<CanvasGroup>();
+
+        if (statusWindowGroup != null)
+            statusCanvasGroup = statusWindowGroup.GetComponent<CanvasGroup>();
+
+        // 안전 장치: CanvasGroup이 없으면 추가
+        if (statusCanvasGroup == null && statusWindowGroup != null)
+            statusCanvasGroup = statusWindowGroup.AddComponent<CanvasGroup>();
     }
 
     private void Start()
@@ -43,7 +49,9 @@ public class InteractionUIController : MonoBehaviour
     {
         if (raycastCamera == null || statusCanvasGroup == null) return;
 
+        // 화면 정중앙에서 전방 레이
         Ray ray = new Ray(raycastCamera.transform.position, raycastCamera.transform.forward);
+
         if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance, interactableLayer))
         {
             // 1) Crop 우선
@@ -65,8 +73,19 @@ public class InteractionUIController : MonoBehaviour
                 UpdateFarmPlotUI(plot);
                 return;
             }
+
+            // 3) Bed
+            Bed bed = hit.collider.GetComponentInParent<Bed>();
+            if (bed != null)
+            {
+                SetMode(TargetMode.Bed);
+                statusCanvasGroup.alpha = 1f;
+                UpdateBedUI(bed);
+                return;
+            }
         }
 
+        // 감지 대상 없음
         SetMode(TargetMode.None);
         statusCanvasGroup.alpha = 0f;
     }
@@ -79,8 +98,8 @@ public class InteractionUIController : MonoBehaviour
         switch (_mode)
         {
             case TargetMode.Crop:
-                normalStatusGroup.SetActive(true);
-                statusMessageText.gameObject.SetActive(false);
+                if (normalStatusGroup) normalStatusGroup.SetActive(true);
+                if (statusMessageText) statusMessageText.gameObject.SetActive(false);
 
                 if (growthSlider) growthSlider.gameObject.SetActive(true);
                 if (tilledSlider) tilledSlider.gameObject.SetActive(false);
@@ -88,16 +107,24 @@ public class InteractionUIController : MonoBehaviour
                 break;
 
             case TargetMode.FarmPlot:
-                normalStatusGroup.SetActive(true);
-                statusMessageText.gameObject.SetActive(false);
+                if (normalStatusGroup) normalStatusGroup.SetActive(true);
+                if (statusMessageText) statusMessageText.gameObject.SetActive(false);
 
                 if (growthSlider) growthSlider.gameObject.SetActive(false);
                 if (tilledSlider) tilledSlider.gameObject.SetActive(true);
                 if (modeLabelText) modeLabelText.gameObject.SetActive(true);
                 break;
 
+            case TargetMode.Bed:
+                if (normalStatusGroup) normalStatusGroup.SetActive(false); // 슬라이더류 OFF
+                if (statusMessageText) statusMessageText.gameObject.SetActive(true);
+                if (modeLabelText) modeLabelText.gameObject.SetActive(false);
+                if (growthSlider) growthSlider.gameObject.SetActive(false);
+                if (tilledSlider) tilledSlider.gameObject.SetActive(false);
+                break;
+
             case TargetMode.None:
-                // 그냥 alpha=0 처리
+                // 그대로 두고 alpha만 0 처리 (Update에서 제어)
                 break;
         }
     }
@@ -107,35 +134,52 @@ public class InteractionUIController : MonoBehaviour
     {
         if (crop.State == CropManager.CropState.Growing)
         {
-            normalStatusGroup.SetActive(true);
-            statusMessageText.gameObject.SetActive(false);
+            if (normalStatusGroup) normalStatusGroup.SetActive(true);
+            if (statusMessageText) statusMessageText.gameObject.SetActive(false);
 
-            float growthPercent = crop.GrowthTimer / crop.GrowthDuration;
+            float growthPercent = (crop.GrowthDuration > 0f)
+                ? Mathf.Clamp01(crop.GrowthTimer / crop.GrowthDuration)
+                : 0f;
+
             if (growthSlider) growthSlider.value = growthPercent;
-
             if (modeLabelText) modeLabelText.text = "Growth";
         }
         else if (crop.State == CropManager.CropState.Grown)
         {
-            normalStatusGroup.SetActive(false);
-            statusMessageText.gameObject.SetActive(true);
-            statusMessageText.text = "Fully Grown\n(Press E/Game pad North to Harvest)";
+            if (normalStatusGroup) normalStatusGroup.SetActive(false);
+            if (statusMessageText)
+            {
+                statusMessageText.gameObject.SetActive(true);
+                statusMessageText.text = "Fully Grown\n(Press Interact to Harvest)";
+            }
         }
         else // Dead
         {
-            normalStatusGroup.SetActive(false);
-            statusMessageText.gameObject.SetActive(true);
-            statusMessageText.text = "Dead\n(Press E/Game pad North to Clear)";
+            if (normalStatusGroup) normalStatusGroup.SetActive(false);
+            if (statusMessageText)
+            {
+                statusMessageText.gameObject.SetActive(true);
+                statusMessageText.text = "Dead\n(Press Interact to Clear)";
+            }
         }
     }
 
     // -------- FarmPlot --------
     private void UpdateFarmPlotUI(FarmPlot plot)
     {
-        float tilled = Mathf.Clamp01(plot.TilledPercentNormalized);
+        if (normalStatusGroup) normalStatusGroup.SetActive(true);
+        if (statusMessageText) statusMessageText.gameObject.SetActive(false);
 
+        float tilled = Mathf.Clamp01(plot.TilledPercentNormalized);
         if (tilledSlider) tilledSlider.value = tilled;
 
         if (modeLabelText) modeLabelText.text = "Tilled";
+    }
+
+    // -------- Bed --------
+    private void UpdateBedUI(Bed bed)
+    {
+        if (statusMessageText)
+            statusMessageText.text = bed.GetInteractionText();
     }
 }

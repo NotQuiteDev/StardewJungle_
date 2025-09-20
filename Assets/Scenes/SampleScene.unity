@@ -900,8 +900,9 @@ GameObject:
   m_Component:
   - component: {fileID: 402269920}
   - component: {fileID: 402269919}
+  - component: {fileID: 402269921}
   m_Layer: 0
-  m_Name: DayNightManager
+  m_Name: timesleepManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -919,7 +920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a6bd7b7ae8fb644084f5d9b573b53ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayLengthMinutes: 1
+  dayLengthMinutes: 10
   startHour: 8
   sunriseHour: 6
   sunsetHour: 19
@@ -931,15 +932,15 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
-      value: 0
+      time: 1.0133362
+      value: -0.008563995
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -997,6 +998,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &402269921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402269918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae0caa209ed9f0549b969279c2e9a7d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sleepTimeScale: 60
+  minSleepRealtime: 1
+  dayNight: {fileID: 402269919}
+  playerMovement: {fileID: 1142102971}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2298,6 +2315,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 978077356}
   m_CullTransparentMesh: 1
+--- !u!1 &995328864 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1480283875221539503, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+  m_PrefabInstance: {fileID: 1770781884}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &995328866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 995328864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28933f8044e961941a4b0a39e7e25775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactText: "Press \u3138E/North to Sleep (press again to wake)"
+  sleepManager: {fileID: 402269921}
 --- !u!1 &1130193138
 GameObject:
   m_ObjectHideFlags: 0
@@ -2459,6 +2495,17 @@ MonoBehaviour:
   focusUI: {fileID: 1684902889}
   equipPoint: {fileID: 2016263659}
   slotCounts: 1e000000000000000000000000000000000000000000000000000000000000000000000000000000
+--- !u!114 &1142102971 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8912874134143890963, guid: 22ef00c1dcedbac4b89e6bbccf725072, type: 3}
+  m_PrefabInstance: {fileID: 243055991}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142102955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e58fc410f0f4ee47a706084b41db073, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1152592949
 GameObject:
   m_ObjectHideFlags: 0
@@ -3888,6 +3935,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1684902889}
   m_CullTransparentMesh: 1
+--- !u!1001 &1770781884
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1480283875221539503, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_Name
+      value: bed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1480283875221539503, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1935580916478649111, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.1787295
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.449
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 14.146862
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133883829133129778, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8941661590808875016, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1480283875221539503, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 995328866}
+  m_SourcePrefab: {fileID: 100100000, guid: a4c710fe7ff8e1848914db49dfed091d, type: 3}
 --- !u!1001 &1778415152
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4532,3 +4651,4 @@ SceneRoots:
   - {fileID: 1202023193}
   - {fileID: 956879030}
   - {fileID: 402269920}
+  - {fileID: 1770781884}
