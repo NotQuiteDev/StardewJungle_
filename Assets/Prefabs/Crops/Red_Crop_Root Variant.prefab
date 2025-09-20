@@ -62,7 +62,7 @@ PrefabInstance:
       objectReference: {fileID: 5604226665565553027, guid: 5b11b6cbd307da44bb53e48e52f9fcb8, type: 3}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: maxWaterAmount
-      value: 2000
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: minWaterAmount
@@ -73,8 +73,12 @@ PrefabInstance:
       value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
+      propertyPath: greenZoneWidth01
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: waterLossPerSecond
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: overrideInitialWater
@@ -90,11 +94,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: initialWaterAmountInspector
-      value: 50
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: optimalWaterAmountInspector
-      value: 1500
+      value: 700
       objectReference: {fileID: 0}
     - target: {fileID: 3737895123174336748, guid: 26c854d063ce7f446982cd6a75c18c83, type: 3}
       propertyPath: harvestGrades.Array.data[0].gradeName

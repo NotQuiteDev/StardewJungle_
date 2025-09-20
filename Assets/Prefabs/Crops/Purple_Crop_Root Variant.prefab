@@ -17,6 +17,26 @@ PrefabInstance:
       value: Purple_Crop_Root Variant
       objectReference: {fileID: 0}
     - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
+      propertyPath: growthDuration
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
+      propertyPath: maxWaterAmount
+      value: 30000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
+      propertyPath: waterLossPerSecond
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
+      propertyPath: initialWaterAmountInspector
+      value: 3000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
+      propertyPath: optimalWaterAmountInspector
+      value: 6000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5401858021538435006, guid: 0acfb1a0a3ca5ef438b34e7dc487fbeb, type: 3}
       propertyPath: harvestGrades.Array.data[0].cropItemToDrop
       value: 
       objectReference: {fileID: 11400000, guid: fcd62095813bf3f47956641a2280e6f3, type: 2}

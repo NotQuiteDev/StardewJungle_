@@ -9,6 +9,26 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
+      propertyPath: growthDuration
+      value: 3000
+      objectReference: {fileID: 0}
+    - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
+      propertyPath: maxWaterAmount
+      value: 6000
+      objectReference: {fileID: 0}
+    - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
+      propertyPath: waterLossPerSecond
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
+      propertyPath: initialWaterAmountInspector
+      value: 600
+      objectReference: {fileID: 0}
+    - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
+      propertyPath: optimalWaterAmountInspector
+      value: 2400
+      objectReference: {fileID: 0}
+    - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
       propertyPath: harvestGrades.Array.data[0].cropItemToDrop
       value: 
       objectReference: {fileID: 11400000, guid: 25da24c5c94760a4f9ad3fdbff836fb2, type: 2}
