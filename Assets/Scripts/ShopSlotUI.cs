@@ -9,6 +9,7 @@ public class ShopSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Button buyButton;
+    [SerializeField] private Button buyAllButton;
 
     private ShopItem currentItem;
 
@@ -18,15 +19,15 @@ public class ShopSlotUI : MonoBehaviour
         {
             buyButton.onClick.AddListener(OnBuyButtonClick);
         }
+        if (buyAllButton != null)
+        {
+            buyAllButton.onClick.AddListener(OnBuyAllButtonClick);
+        }
     }
 
-    /// <summary>
-    /// '구매' 목록에 표시될 슬롯을 설정합니다.
-    /// </summary>
     public void Setup(ShopItem itemToDisplay)
     {
         currentItem = itemToDisplay;
-
         if (currentItem == null || currentItem.item == null)
         {
             gameObject.SetActive(false);
@@ -37,17 +38,30 @@ public class ShopSlotUI : MonoBehaviour
         itemNameText.text = currentItem.item.itemName;
         priceText.text = $"$ {currentItem.price:N0}";
 
+        bool canAffordOne = ShopUIManager.Instance.CanAfford(currentItem.price);
+        if(buyButton != null) buyButton.interactable = canAffordOne;
+        if(buyAllButton != null) buyAllButton.interactable = canAffordOne;
+
         gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// '구매' 버튼이 눌렸을 때 호출될 함수
-    /// </summary>
     public void OnBuyButtonClick()
     {
         if (currentItem != null)
         {
-            ShopUIManager.Instance.TryPurchaseItem(currentItem);
+            // ## 수정: 1개 구매 시도 후, 성공했다면 UI를 새로고침 ##
+            if(ShopUIManager.Instance.TryPurchaseItem(currentItem))
+            {
+                ShopUIManager.Instance.RefreshUI(); // public으로 변경 필요
+            }
+        }
+    }
+
+    public void OnBuyAllButtonClick()
+    {
+        if (currentItem != null)
+        {
+            ShopUIManager.Instance.TryPurchaseMaxAffordable(currentItem);
         }
     }
 }
