@@ -302,7 +302,7 @@ public class InventoryManager : MonoBehaviour
 
         // 5. 생성된 아이템에 정보 주입 (어떤 아이템인지, 1개인지)
         dropInstance.GetComponent<ItemDrop>().Initialize(itemToDrop, 1);
-        
+
         // 6. 생성된 아이템에 물리적 힘을 가해 앞으로 던지기
         Rigidbody rb = dropInstance.GetComponent<Rigidbody>();
         if (rb != null)
@@ -312,6 +312,27 @@ public class InventoryManager : MonoBehaviour
 
         // 7. 인벤토리에서 아이템 1개 소모
         ConsumeFocusedItem(1);
+    }
+    /// <summary>
+    /// ## 추가: 특정 아이템의 개수를 확인하여 반환하는 함수 (대장간 UI용) ##
+    /// </summary>
+    /// <param name="itemToFind">개수를 확인할 ItemData</param>
+    /// <returns>해당 아이템의 개수. 없으면 0을 반환.</returns>
+    public int GetItemCount(ItemData itemToFind)
+    {
+        // 인벤토리 슬롯 전체를 순회합니다.
+        for (int i = 0; i < inventorySlotsData.Length; i++)
+        {
+            // 현재 슬롯의 아이템이 찾으려는 아이템과 동일하다면,
+            if (inventorySlotsData[i] == itemToFind)
+            {
+                // 해당 슬롯의 아이템 개수를 반환합니다.
+                return slotCounts[i];
+            }
+        }
+
+        // 루프가 끝날 때까지 아이템을 찾지 못했다면, 0개를 가지고 있는 것이므로 0을 반환합니다.
+        return 0;
     }
 
 }
