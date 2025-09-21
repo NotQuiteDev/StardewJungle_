@@ -64,6 +64,12 @@ public class PickaxeRuntime : MonoBehaviour
             var stone = hit.collider.GetComponent<MineableStone>();
             if (stone != null)
             {
+                                // ## 수정: 돌을 찾은 후에 스태미나를 확인하고 소모합니다. ##
+                if (!StaminaManager.Instance.UseStamina(_data.staminaCost))
+                {
+                    return; // 스태미나가 부족하면 돌을 캐지 않음
+                }
+
                 // 돌을 찾았으면 데미지를 줌
                 stone.TakeDamage(_data.damagePerSwing);
                 

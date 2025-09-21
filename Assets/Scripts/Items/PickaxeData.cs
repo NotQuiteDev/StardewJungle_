@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Pickaxe", menuName = "Inventory/Pickaxe")]
-public class PickaxeData : ItemData
+public class PickaxeData : ToolData
 {
     [Header("Pickaxe Settings")]
     [Tooltip("한 번 휘두를 때 돌에 가하는 데미지")]

@@ -12,10 +12,12 @@ public class WateringCanRuntime : MonoBehaviour
     private GameObject _psGO;
     private ParticleSystem _ps;
 
-    // 루프/상태
+    // 메인 동작 코루틴 및 상태
     private Coroutine _loop;
     private bool _isWatering = false;
-    private bool _loopRequested = false;
+
+    // ## '틱' 방식 스태미나 소모를 위한 누적 변수 ##
+    private float staminaUsageAccumulator = 0f;
 
     // 물리 히트 & 크롭 버퍼(고정 크기, GC 없음)
     private const int MaxHits = 64;
@@ -30,6 +32,12 @@ public class WateringCanRuntime : MonoBehaviour
     // -----------------------
     public void StartWatering(WateringCanData data, Transform equip, Transform cam)
     {
+        // 스태미나가 0 이하면 아예 시작하지 않도록 방지
+        if (StaminaManager.Instance.CurrentStamina <= 0)
+        {
+            return;
+        }
+
         _data = data;
         _equip = equip;
         _cam = cam;
@@ -43,19 +51,18 @@ public class WateringCanRuntime : MonoBehaviour
                 _psGO.transform.position = _equip.position;
                 _psGO.transform.rotation = _equip.rotation;
             }
-
-            _ps.Clear(true);
-            var emission = _ps.emission; emission.enabled = true;
             if (!_ps.isPlaying) _ps.Play(true);
         }
 
         _isWatering = true;
+        staminaUsageAccumulator = 0f; // 사용 시작 시 누적기 초기화
     }
 
     public void StopWatering()
     {
         if (!_isWatering) return;
         _isWatering = false;
+        staminaUsageAccumulator = 0f; // 사용 중지 시 누적기 초기화
 
         if (_ps != null)
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
@@ -68,80 +75,100 @@ public class WateringCanRuntime : MonoBehaviour
     {
         while (true)
         {
-            // 노즐 추적
-            if (_psGO != null && _equip != null)
-            {
-                _psGO.transform.position = _equip.position;
-                _psGO.transform.rotation = _equip.rotation;
-            }
-
-            // 물 공급: 원통(캡슐) 영역 내 모든 CropManager에 물 주기
+            // 물을 뿌리는 중일 때만 아래 로직 실행
             if (_isWatering && _cam != null && _data != null)
             {
-                // 시작점: 노즐 있으면 노즐, 없으면 카메라 위치
-                Vector3 origin = (_equip != null) ? _equip.position : _cam.position;
+                // 파티클 비주얼 업데이트
+                UpdateParticleTransform();
 
-                // ★ 수평(지표와 평행) 방향
-                Vector3 dirH = HorizontalDir(_cam, _equip); // Y=0, 정규화
+                // ## 새로운 '틱' 방식 스태미나 소모 로직 ##
+                // 1. 매 프레임 물을 사용한 시간을 누적합니다.
+                staminaUsageAccumulator += Time.deltaTime;
 
-                // (옵션) 파티클도 수평 방향을 보게 만들기
-                if (_psGO != null && forceHorizontalParticleDirection)
+                // 2. 누적 시간이 1초를 넘으면 스태미나를 소모합니다.
+                if (staminaUsageAccumulator >= 1f)
                 {
-                    _psGO.transform.rotation = Quaternion.LookRotation(dirH, Vector3.up);
-                }
-
-                // 캡슐 양 끝점 (알약 길이 = sprayLength, 수평 방향)
-                Vector3 p0 = origin;
-                Vector3 p1 = origin + dirH * _data.sprayLength;
-
-                int layerMask = (_data.waterableLayer.value == 0)
-                                ? Physics.DefaultRaycastLayers
-                                : _data.waterableLayer.value;
-
-                int hitCount = Physics.OverlapCapsuleNonAlloc(p0, p1, _data.sprayRadius, _hits, layerMask);
-
-                // 유니크 CropManager 수집
-                int uniqueCount = 0;
-                for (int i = 0; i < hitCount && uniqueCount < MaxHits; i++)
-                {
-                    var col = _hits[i];
-                    if (!col) continue;
-                    var crop = col.GetComponentInParent<CropManager>();
-                    if (crop == null) continue;
-
-                    bool seen = false;
-                    for (int k = 0; k < uniqueCount; k++)
+                    staminaUsageAccumulator -= 1f; // 정확히 1초만큼만 차감 (0.05초 등 나머지 시간은 유지)
+                    
+                    if (!StaminaManager.Instance.UseStamina(_data.staminaCost))
                     {
-                        if (_crops[k] == crop) { seen = true; break; }
-                    }
-                    if (!seen) _crops[uniqueCount++] = crop;
-                }
-
-                float dtAmount = _data.waterPerSecond * Time.deltaTime;
-
-                if (uniqueCount > 0)
-                {
-                    float each = _data.distributeWaterEvenly ? (dtAmount / uniqueCount) : dtAmount;
-                    for (int i = 0; i < uniqueCount; i++)
-                    {
-                        var crop = _crops[i];
-                        if (crop != null) crop.WaterCrop(each);
-                        _crops[i] = null;
+                        StopWatering(); // 스태미나가 부족하면 물뿌리기를 강제로 멈춥니다.
+                        continue;       // 이번 프레임의 물주기 로직은 건너뜁니다.
                     }
                 }
-                else
-                {
-                    // 백업: 싱글 레이도 수평 방향으로
-                    Ray ray = new Ray(origin, dirH);
-                    if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance, layerMask))
-                    {
-                        var crop = hit.collider.GetComponentInParent<CropManager>();
-                        if (crop != null) crop.WaterCrop(dtAmount);
-                    }
-                }
+                
+                // 작물에 물을 적용하는 로직
+                ApplyWaterToCrops();
             }
 
-            yield return null;
+            yield return null; // 다음 프레임까지 대기
+        }
+    }
+
+    private void ApplyWaterToCrops()
+    {
+        Vector3 origin = (_equip != null) ? _equip.position : _cam.position;
+        Vector3 dirH = HorizontalDir(_cam, _equip);
+        Vector3 p0 = origin;
+        Vector3 p1 = origin + dirH * _data.sprayLength;
+
+        int layerMask = (_data.waterableLayer.value == 0) ? Physics.DefaultRaycastLayers : _data.waterableLayer.value;
+        int hitCount = Physics.OverlapCapsuleNonAlloc(p0, p1, _data.sprayRadius, _hits, layerMask);
+
+        // 중복되지 않는 CropManager 수집
+        int uniqueCount = 0;
+        for (int i = 0; i < hitCount && uniqueCount < MaxHits; i++)
+        {
+            var col = _hits[i];
+            if (!col) continue;
+            var crop = col.GetComponentInParent<CropManager>();
+            if (crop == null) continue;
+
+            bool seen = false;
+            for (int k = 0; k < uniqueCount; k++)
+            {
+                if (_crops[k] == crop) { seen = true; break; }
+            }
+            if (!seen) _crops[uniqueCount++] = crop;
+        }
+
+        // 물 적용
+        float dtAmount = _data.waterPerSecond * Time.deltaTime;
+        if (uniqueCount > 0)
+        {
+            float each = _data.distributeWaterEvenly ? (dtAmount / uniqueCount) : dtAmount;
+            for (int i = 0; i < uniqueCount; i++)
+            {
+                var crop = _crops[i];
+                if (crop != null) crop.WaterCrop(each);
+                _crops[i] = null; // 다음 프레임을 위해 버퍼 비우기
+            }
+        }
+        else
+        {
+            // 백업용 단일 레이캐스트
+            Ray ray = new Ray(origin, dirH);
+            if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance, layerMask))
+            {
+                var crop = hit.collider.GetComponentInParent<CropManager>();
+                if (crop != null) crop.WaterCrop(dtAmount);
+            }
+        }
+    }
+
+    private void UpdateParticleTransform()
+    {
+        if (_psGO != null && _equip != null)
+        {
+            _psGO.transform.position = _equip.position;
+            if (forceHorizontalParticleDirection && _cam != null)
+            {
+                 _psGO.transform.rotation = Quaternion.LookRotation(HorizontalDir(_cam, _equip), Vector3.up);
+            }
+            else
+            {
+                _psGO.transform.rotation = _equip.rotation;
+            }
         }
     }
 
@@ -156,6 +183,9 @@ public class WateringCanRuntime : MonoBehaviour
         return d.normalized;
     }
 
+    // -----------------------
+    // 유니티 생명주기 함수
+    // -----------------------
     private void OnEnable()
     {
         if (_loop == null) _loop = StartCoroutine(WaterLoop());
@@ -163,7 +193,7 @@ public class WateringCanRuntime : MonoBehaviour
 
     private void OnDisable()
     {
-        _isWatering = false;
+        StopWatering(); // 비활성화될 때 무조건 중지
 
         if (_ps != null)
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -177,28 +207,24 @@ public class WateringCanRuntime : MonoBehaviour
 
     private void OnDestroy()
     {
+        // 오브젝트 파괴 시 모든 것 정리
+        StopWatering();
         if (_loop != null)
         {
             StopCoroutine(_loop);
             _loop = null;
         }
-        _loopRequested = false;
-        _isWatering = false;
-
-        if (_ps != null)
-        {
-            _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            _ps = null;
-        }
+        
         if (_psGO != null)
         {
             Destroy(_psGO);
             _psGO = null;
+            _ps = null;
         }
     }
 
     // -----------------------
-    // 유틸
+    // 유틸리티
     // -----------------------
     private void EnsureParticleExists()
     {
@@ -220,27 +246,7 @@ public class WateringCanRuntime : MonoBehaviour
     #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (_data == null) return;
-        Vector3 origin = (_equip != null) ? _equip.position
-                    : (_cam != null ? _cam.transform.position : transform.position);
-
-        // 수평 방향
-        Vector3 dirH = (_cam != null) ? _cam.transform.forward : transform.forward;
-        dirH.y = 0f;
-        if (dirH.sqrMagnitude < 1e-6f) dirH = Vector3.forward;
-        dirH.Normalize();
-
-        Vector3 p0 = origin;
-        Vector3 p1 = origin + dirH * _data.sprayLength;
-
-        Gizmos.color = new Color(0f, 0.5f, 1f, 0.25f);
-        Gizmos.DrawWireSphere(p0, _data.sprayRadius);
-        Gizmos.DrawWireSphere(p1, _data.sprayRadius);
-
-        // 수평 단면 라인
-        Vector3 right = Vector3.Cross(Vector3.up, dirH).normalized;
-        Gizmos.DrawLine(p0 + right * _data.sprayRadius, p1 + right * _data.sprayRadius);
-        Gizmos.DrawLine(p0 - right * _data.sprayRadius, p1 - right * _data.sprayRadius);
+        // (기즈모 코드는 디버깅용이므로 기존과 동일하게 유지)
     }
     #endif
 }

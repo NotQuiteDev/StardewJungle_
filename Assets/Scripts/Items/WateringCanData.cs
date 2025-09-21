@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Watering Can", menuName = "Inventory/Watering Can")]
-public class WateringCanData : ItemData
+public class WateringCanData : ToolData
 {
     [Header("물뿌리개 전용 설정")]
     [Tooltip("분사 파티클 프리팹(Particle System 포함된 GO)")]

@@ -66,17 +66,20 @@ public class TillingHoeRuntime : MonoBehaviour
     private void DoSwing()
     {
         if (_data == null || _cam == null) return;
-
-        // 쿨다운 체크 (탭-스팸 방지)
         if (Time.time - _lastSwingTime < _data.swingCooldown) return;
-        _lastSwingTime = Time.time;
 
-        // 1) 카메라 전방 Ray (FarmPlot 또는 Ground)
         int mask = _data.farmPlotMask | _data.groundMask;
         if (!Physics.Raycast(new Ray(_cam.position, _cam.forward), out RaycastHit hit, _data.raycastDistance, mask))
             return;
 
-        // 2) 이미 경작지면: 생성 없이 Till 추가
+        // ## 수정: 유효한 타겟(땅 또는 밭)을 찾은 직후 스태미나를 확인하고 소모합니다. ##
+        if (!StaminaManager.Instance.UseStamina(_data.staminaCost))
+        {
+            return; // 스태미나가 부족하면 땅을 파지 않음
+        }
+
+        _lastSwingTime = Time.time;
+        
         var existingPlot = hit.collider.GetComponentInParent<FarmPlot>();
         if (existingPlot != null)
         {
@@ -84,22 +87,19 @@ public class TillingHoeRuntime : MonoBehaviour
             return;
         }
 
-        // 3) Ground 확정(안전 재캐스트)
         if (!Physics.Raycast(new Ray(hit.point + Vector3.up * 2f, Vector3.down),
                              out RaycastHit groundHit, 5f, _data.groundMask))
         {
-            groundHit = hit; // 첫 히트가 Ground였을 수 있음
+            groundHit = hit;
         }
 
-        // 4) 스냅/간격/높이 보정
         Vector3 spawnPos = groundHit.point;
         if (_data.gridSize > 0f) spawnPos = SnapToGrid(spawnPos, _data.gridSize);
         spawnPos.y = groundHit.point.y + _data.spawnHeightOffset;
 
         if (!IsSpaceFree(spawnPos, _data.minSeparation, _data.farmPlotMask))
-            return; // 근처에 이미 있으면 생성 금지
+            return;
 
-        // 5) 정확히 1개 생성 후 1회 Till
         var go = Object.Instantiate(_data.farmPlotPrefab, spawnPos, Quaternion.identity);
         var plot = go.GetComponent<FarmPlot>();
         if (plot == null)

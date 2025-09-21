@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Hoe", menuName = "Inventory/Hoe")]
-public class TillingHoeData : ItemData
+public class TillingHoeData : ToolData
 {
     [Header("Hoe Settings")]
     [Tooltip("경작지 프리팹(FarmPlot)")]
