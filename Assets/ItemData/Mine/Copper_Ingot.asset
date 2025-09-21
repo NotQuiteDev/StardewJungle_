@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39b22ef5c732d0f44a90a5aad96d7a23, type: 3}
   m_Name: Copper_Ingot
   m_EditorClassIdentifier: 
-  itemName: Gold Ingot
-  itemIcon: {fileID: 0}
-  itemPrefab: {fileID: 8668053117406282989, guid: c7143be2fc852ce4c80270b26cb156b3, type: 3}
-  sellPrice: 100
-  itemDescription: 
+  itemName: Copper Ingot
+  itemIcon: {fileID: 21300000, guid: 14ac9b07323bde349a96c47bc49882f7, type: 3}
+  itemPrefab: {fileID: 7675784970411992677, guid: ad87e17eb6abb9243b26857e243b32fe, type: 3}
+  sellPrice: 10
+  itemDescription: ' An ingot made from Rock.'

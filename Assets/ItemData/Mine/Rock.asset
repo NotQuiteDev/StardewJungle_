@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39b22ef5c732d0f44a90a5aad96d7a23, type: 3}
   m_Name: Rock
   m_EditorClassIdentifier: 
-  itemName: 
-  itemIcon: {fileID: 0}
-  itemPrefab: {fileID: 0}
-  sellPrice: 0
-  itemDescription: "\uC124\uBA85\uC744 \uC785\uB825\uD558\uC138\uC694."
+  itemName: Rock
+  itemIcon: {fileID: 21300000, guid: f35156c4c26ccb24fa3dc4da04c9ac6e, type: 3}
+  itemPrefab: {fileID: 3309811903383563124, guid: 8eb60b0c9318d3042b64c36717582599, type: 3}
+  sellPrice: 5
+  itemDescription: A hard and common piece of rock.

@@ -128,4 +128,5 @@ MonoBehaviour:
     maxCount: 2
     dropChance: 1
   itemDropShellPrefab: {fileID: 5604226665565553027, guid: 5b11b6cbd307da44bb53e48e52f9fcb8, type: 3}
+  dropYOffset: 1
   destructionEffectPrefab: {fileID: 0}

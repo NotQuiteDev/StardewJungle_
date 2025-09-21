@@ -1,16 +1,14 @@
 using UnityEngine;
 
-// ## ItemDropInfo 구조체에 dropChance 추가 ##
 [System.Serializable]
 public struct ItemDropInfo
 {
     public ItemData itemData;
     public int minCount;
     public int maxCount;
-    
     [Tooltip("이 아이템이 드랍될 확률 (0 = 0%, 1 = 100%)")]
-    [Range(0f, 1f)] // 인스펙터에서 0과 1 사이를 조절하는 슬라이더가 생깁니다.
-    public float dropChance; 
+    [Range(0f, 1f)]
+    public float dropChance;
 }
 
 public class MineableStone : MonoBehaviour
@@ -25,6 +23,10 @@ public class MineableStone : MonoBehaviour
     [Header("드랍 프리팹")]
     [Tooltip("바닥에 생성될 아이템 드랍 셸 프리팹 (ItemDrop 스크립트가 있는 것)")]
     [SerializeField] private GameObject itemDropShellPrefab;
+    
+    // ## 추가: 아이템 생성 높이 조절 변수 ##
+    [Tooltip("아이템이 생성될 때의 Y축 높이 오프셋. 땅에 파묻히는 것을 방지합니다.")]
+    [SerializeField] private float dropYOffset = 0.5f;
     
     [Header("이펙트")]
     [SerializeField] private GameObject destructionEffectPrefab;
@@ -61,10 +63,11 @@ public class MineableStone : MonoBehaviour
 
         if (itemDropShellPrefab != null)
         {
+            // ## 수정: 드랍 기준 위치에 Y 오프셋을 먼저 더해줍니다. ##
+            Vector3 baseSpawnPosition = transform.position + new Vector3(0, dropYOffset, 0);
+
             foreach (var drop in dropTable)
             {
-                // ## 드랍 확률 체크 로직 추가 ##
-                // 0과 1 사이의 랜덤 숫자를 뽑아서, 설정한 dropChance보다 작거나 같으면 통과 (드랍 성공)
                 if (Random.value <= drop.dropChance)
                 {
                     if (drop.itemData == null) continue;
@@ -72,7 +75,8 @@ public class MineableStone : MonoBehaviour
                     int count = Random.Range(drop.minCount, drop.maxCount + 1);
                     for (int i = 0; i < count; i++)
                     {
-                        Vector3 spawnPos = transform.position + Random.insideUnitSphere * 0.5f;
+                        // ## 수정: Y 오프셋이 적용된 위치 주변에 아이템을 흩뿌립니다. ##
+                        Vector3 spawnPos = baseSpawnPosition + Random.insideUnitSphere * 0.5f;
                         GameObject dropInstance = Instantiate(itemDropShellPrefab, spawnPos, Quaternion.identity);
 
                         var itemDrop = dropInstance.GetComponent<ItemDrop>();
