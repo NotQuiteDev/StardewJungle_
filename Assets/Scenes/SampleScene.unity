@@ -1298,7 +1298,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sleepTimeScale: 60
-  minSleepRealtime: 1
+  minSleepRealtime: 0.2
   dayNight: {fileID: 402269919}
   playerMovement: {fileID: 1142102971}
 --- !u!1 &410087039

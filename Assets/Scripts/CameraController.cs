@@ -91,8 +91,8 @@ public class CameraController : MonoBehaviour
         // ▼▼▼ Look 액션 값 읽기 ▼▼▼
         lookInput = playerControls.Player.Look.ReadValue<Vector2>();
 
-        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
+    float mouseX = lookInput.x * mouseSensitivity * Time.unscaledDeltaTime;
+    float mouseY = lookInput.y * mouseSensitivity * Time.unscaledDeltaTime;
         // ▲▲▲ 수정된 부분 ▲▲▲
 
         rotationX += mouseX;
