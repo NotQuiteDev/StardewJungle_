@@ -1,12 +1,16 @@
 using UnityEngine;
 
-// ## ItemDropInfo 구조체 수정: GameObject 대신 ItemData를 직접 사용 ##
+// ## ItemDropInfo 구조체에 dropChance 추가 ##
 [System.Serializable]
 public struct ItemDropInfo
 {
-    public ItemData itemData; // 드랍할 아이템의 ScriptableObject
+    public ItemData itemData;
     public int minCount;
     public int maxCount;
+    
+    [Tooltip("이 아이템이 드랍될 확률 (0 = 0%, 1 = 100%)")]
+    [Range(0f, 1f)] // 인스펙터에서 0과 1 사이를 조절하는 슬라이더가 생깁니다.
+    public float dropChance; 
 }
 
 public class MineableStone : MonoBehaviour
@@ -18,7 +22,6 @@ public class MineableStone : MonoBehaviour
     [Header("아이템 드랍 테이블")]
     [SerializeField] private ItemDropInfo[] dropTable;
 
-    // ## 추가: InventoryManager에 있는 드랍 아이템 '껍데기' 프리팹 연결 ##
     [Header("드랍 프리팹")]
     [Tooltip("바닥에 생성될 아이템 드랍 셸 프리팹 (ItemDrop 스크립트가 있는 것)")]
     [SerializeField] private GameObject itemDropShellPrefab;
@@ -32,8 +35,6 @@ public class MineableStone : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
-
-        // ## 중요: 드랍 셸이 연결되었는지 시작 시 확인 ##
         if (itemDropShellPrefab == null)
         {
             Debug.LogError("Item Drop Shell Prefab이 MineableStone에 연결되지 않았습니다!", this.gameObject);
@@ -58,32 +59,34 @@ public class MineableStone : MonoBehaviour
             Instantiate(destructionEffectPrefab, transform.position, Quaternion.identity);
         }
 
-        // ## 드랍 로직 수정: InventoryManager와 동일한 방식으로 변경 ##
         if (itemDropShellPrefab != null)
         {
             foreach (var drop in dropTable)
             {
-                if (drop.itemData == null) continue;
-
-                int count = Random.Range(drop.minCount, drop.maxCount + 1);
-                for (int i = 0; i < count; i++)
+                // ## 드랍 확률 체크 로직 추가 ##
+                // 0과 1 사이의 랜덤 숫자를 뽑아서, 설정한 dropChance보다 작거나 같으면 통과 (드랍 성공)
+                if (Random.value <= drop.dropChance)
                 {
-                    Vector3 spawnPos = transform.position + Random.insideUnitSphere * 0.5f;
-                    GameObject dropInstance = Instantiate(itemDropShellPrefab, spawnPos, Quaternion.identity);
+                    if (drop.itemData == null) continue;
 
-                    // 생성된 드랍 셸에 아이템 정보 주입
-                    var itemDrop = dropInstance.GetComponent<ItemDrop>();
-                    if(itemDrop != null)
+                    int count = Random.Range(drop.minCount, drop.maxCount + 1);
+                    for (int i = 0; i < count; i++)
                     {
-                        itemDrop.Initialize(drop.itemData, 1); // 셸 하나당 1개씩 드랍
-                    }
-                    
-                    // (선택) 물리 효과로 아이템을 흩뿌리기
-                    var rb = dropInstance.GetComponent<Rigidbody>();
-                    if(rb != null)
-                    {
-                        Vector3 force = (Vector3.up + Random.insideUnitSphere) * 2f;
-                        rb.AddForce(force, ForceMode.Impulse);
+                        Vector3 spawnPos = transform.position + Random.insideUnitSphere * 0.5f;
+                        GameObject dropInstance = Instantiate(itemDropShellPrefab, spawnPos, Quaternion.identity);
+
+                        var itemDrop = dropInstance.GetComponent<ItemDrop>();
+                        if(itemDrop != null)
+                        {
+                            itemDrop.Initialize(drop.itemData, 1);
+                        }
+                        
+                        var rb = dropInstance.GetComponent<Rigidbody>();
+                        if(rb != null)
+                        {
+                            Vector3 force = (Vector3.up + Random.insideUnitSphere) * 2f;
+                            rb.AddForce(force, ForceMode.Impulse);
+                        }
                     }
                 }
             }
