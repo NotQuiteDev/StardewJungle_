@@ -251,6 +251,9 @@ public class PlayerMovement : MonoBehaviour
         if (waterRuntime != null) waterRuntime.StopWatering();
         var hoeRuntime = GetComponent<TillingHoeRuntime>();
         if (hoeRuntime != null) hoeRuntime.StopTilling();
+        // ## 추가된 부분 ##
+        var pickaxeRuntime = GetComponent<PickaxeRuntime>();
+        if (pickaxeRuntime != null) pickaxeRuntime.StopMining();
     }
 
     private void HandleTransparency()

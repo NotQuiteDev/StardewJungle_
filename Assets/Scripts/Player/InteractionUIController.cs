@@ -11,33 +11,31 @@ public class InteractionUIController : MonoBehaviour
 
     [Header("UI 요소 연결")]
     [SerializeField] private GameObject statusWindowGroup;
-    [SerializeField] private GameObject normalStatusGroup;    // 공통 부모
+    [SerializeField] private GameObject normalStatusGroup;
     [SerializeField] private TextMeshProUGUI statusMessageText;
 
-    [Header("Crop: 성장 UI")]
-    [SerializeField] private Slider growthSlider;              // 성장 슬라이더
-
-    [Header("FarmPlot: Tilled UI")]
-    [SerializeField] private Slider tilledSlider;              // 경작도 슬라이더 (0..1)
+    [Header("UI 슬라이더")]
+    [SerializeField] private Slider growthSlider;      // Crop: 성장 슬라이더
+    [SerializeField] private Slider tilledSlider;      // ## FarmPlot과 MineableStone이 공유해서 사용할 슬라이더 ##
+    // [SerializeField] private Slider stoneHealthSlider; // ## 이 줄은 삭제합니다! ##
 
     [Header("라벨 표시")]
-    [SerializeField] private TextMeshProUGUI modeLabelText;    // "Growth" 또는 "Tilled"
+    [SerializeField] private TextMeshProUGUI modeLabelText;
 
     private CanvasGroup statusCanvasGroup;
 
-    private enum TargetMode { None, Crop, FarmPlot, Bed, GenericNPC }
+    private enum TargetMode { None, Crop, FarmPlot, Bed, GenericNPC, MineableStone }
     private TargetMode _mode = TargetMode.None;
 
     private void Awake()
     {
         if (raycastCamera == null) raycastCamera = Camera.main;
-
         if (statusWindowGroup != null)
+        {
             statusCanvasGroup = statusWindowGroup.GetComponent<CanvasGroup>();
-
-        // 안전 장치: CanvasGroup이 없으면 추가
-        if (statusCanvasGroup == null && statusWindowGroup != null)
-            statusCanvasGroup = statusWindowGroup.AddComponent<CanvasGroup>();
+            if (statusCanvasGroup == null)
+                statusCanvasGroup = statusWindowGroup.AddComponent<CanvasGroup>();
+        }
     }
 
     private void Start()
@@ -49,12 +47,11 @@ public class InteractionUIController : MonoBehaviour
     {
         if (raycastCamera == null || statusCanvasGroup == null) return;
 
-        // 화면 정중앙에서 전방 레이
         Ray ray = new Ray(raycastCamera.transform.position, raycastCamera.transform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance, interactableLayer))
         {
-            // 1) Crop 우선
+            // ## 우선순위 1: Crop (가장 구체적인 대상) ##
             CropManager crop = hit.collider.GetComponentInParent<CropManager>();
             if (crop != null)
             {
@@ -64,7 +61,17 @@ public class InteractionUIController : MonoBehaviour
                 return;
             }
 
-            // 2) FarmPlot 다음
+            // ## 우선순위 2: MineableStone ##
+            MineableStone stone = hit.collider.GetComponentInParent<MineableStone>();
+            if (stone != null)
+            {
+                SetMode(TargetMode.MineableStone);
+                statusCanvasGroup.alpha = 1f;
+                UpdateMineableStoneUI(stone);
+                return;
+            }
+
+            // ## 우선순위 3: FarmPlot (Crop이 없을 때만 감지됨) ##
             FarmPlot plot = hit.collider.GetComponentInParent<FarmPlot>();
             if (plot != null)
             {
@@ -74,7 +81,7 @@ public class InteractionUIController : MonoBehaviour
                 return;
             }
 
-            // 3) Bed
+            // ## 나머지 상호작용 오브젝트들 ##
             Bed bed = hit.collider.GetComponentInParent<Bed>();
             if (bed != null)
             {
@@ -83,17 +90,18 @@ public class InteractionUIController : MonoBehaviour
                 UpdateBedUI(bed);
                 return;
             }
+
             InteractableNPC npc = hit.collider.GetComponentInParent<InteractableNPC>();
             if (npc != null)
             {
                 SetMode(TargetMode.GenericNPC);
                 statusCanvasGroup.alpha = 1f;
-                UpdateGenericNPCUI(npc); // 새로 만든 함수 호출
+                UpdateGenericNPCUI(npc);
                 return;
             }
         }
 
-        // 감지 대상 없음
+        // 감지된 대상이 아무것도 없음
         SetMode(TargetMode.None);
         statusCanvasGroup.alpha = 0f;
     }
@@ -103,59 +111,64 @@ public class InteractionUIController : MonoBehaviour
         if (_mode == newMode) return;
         _mode = newMode;
 
+        // 모드가 바뀔 때마다 모든 슬라이더를 끄고 시작하면 관리가 편함
+        if (growthSlider) growthSlider.gameObject.SetActive(false);
+        if (tilledSlider) tilledSlider.gameObject.SetActive(false);
+
         switch (_mode)
         {
+            case TargetMode.MineableStone:
+                if (normalStatusGroup) normalStatusGroup.SetActive(true);
+                if (statusMessageText) statusMessageText.gameObject.SetActive(false);
+                if (tilledSlider) tilledSlider.gameObject.SetActive(true); // ## 공유 슬라이더 켜기 ##
+                if (modeLabelText) modeLabelText.gameObject.SetActive(true);
+                break;
+
             case TargetMode.Crop:
                 if (normalStatusGroup) normalStatusGroup.SetActive(true);
                 if (statusMessageText) statusMessageText.gameObject.SetActive(false);
-
                 if (growthSlider) growthSlider.gameObject.SetActive(true);
-                if (tilledSlider) tilledSlider.gameObject.SetActive(false);
                 if (modeLabelText) modeLabelText.gameObject.SetActive(true);
                 break;
 
             case TargetMode.FarmPlot:
                 if (normalStatusGroup) normalStatusGroup.SetActive(true);
                 if (statusMessageText) statusMessageText.gameObject.SetActive(false);
-
-                if (growthSlider) growthSlider.gameObject.SetActive(false);
                 if (tilledSlider) tilledSlider.gameObject.SetActive(true);
                 if (modeLabelText) modeLabelText.gameObject.SetActive(true);
                 break;
 
             case TargetMode.Bed:
-                if (normalStatusGroup) normalStatusGroup.SetActive(false); // 슬라이더류 OFF
+            case TargetMode.GenericNPC:
+                if (normalStatusGroup) normalStatusGroup.SetActive(false);
                 if (statusMessageText) statusMessageText.gameObject.SetActive(true);
                 if (modeLabelText) modeLabelText.gameObject.SetActive(false);
-                if (growthSlider) growthSlider.gameObject.SetActive(false);
-                if (tilledSlider) tilledSlider.gameObject.SetActive(false);
-                break;
-            // ## 추가 ## : 범용 NPC를 위한 UI 레이아웃 설정 (Bed와 동일)
-            case TargetMode.GenericNPC:
-                if (normalStatusGroup) normalStatusGroup.SetActive(false); // 슬라이더 그룹 끄기
-                if (statusMessageText) statusMessageText.gameObject.SetActive(true); // 메시지 텍스트 켜기
-                if (modeLabelText) modeLabelText.gameObject.SetActive(false);
-                if (growthSlider) growthSlider.gameObject.SetActive(false);
-                if (tilledSlider) tilledSlider.gameObject.SetActive(false);
                 break;
 
             case TargetMode.None:
-                // 그대로 두고 alpha만 0 처리 (Update에서 제어)
                 break;
         }
     }
 
-    // -------- Crop --------
+    private void UpdateMineableStoneUI(MineableStone stone)
+    {
+        float healthPercent = (stone.MaxHealth > 0) ? stone.CurrentHealth / stone.MaxHealth : 0;
+        
+        // ## stoneHealthSlider 대신 tilledSlider를 사용 ##
+        if (tilledSlider) tilledSlider.value = healthPercent;
+
+        if (modeLabelText) modeLabelText.text = "Mineable";
+    }
+
     private void UpdateCropUI(CropManager crop)
     {
+        // (이하 기존과 동일)
         if (crop.State == CropManager.CropState.Growing)
         {
             if (normalStatusGroup) normalStatusGroup.SetActive(true);
             if (statusMessageText) statusMessageText.gameObject.SetActive(false);
 
-            float growthPercent = (crop.GrowthDuration > 0f)
-                ? Mathf.Clamp01(crop.GrowthTimer / crop.GrowthDuration)
-                : 0f;
+            float growthPercent = (crop.GrowthDuration > 0f) ? Mathf.Clamp01(crop.GrowthTimer / crop.GrowthDuration) : 0f;
 
             if (growthSlider) growthSlider.value = growthPercent;
             if (modeLabelText) modeLabelText.text = "Growth";
