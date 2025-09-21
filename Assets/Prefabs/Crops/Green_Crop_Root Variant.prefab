@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5959364996814619672, guid: 55634894a69ea294cb8ffcddaf68a05e, type: 3}
       propertyPath: waterLossPerSecond
-      value: 2.5
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 5959364996814619672, guid: 55634894a69ea294cb8ffcddaf68a05e, type: 3}
       propertyPath: debugWaterEverySecond

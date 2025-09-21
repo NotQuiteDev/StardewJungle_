@@ -162,6 +162,9 @@ public class CropManager : MonoBehaviour, IInteractable
 
         // 수분 감소 + 점수
         CurrentWaterAmount -= waterLossPerSecond * Time.deltaTime;
+        // ## 추가: 수분량이 0 밑으로 떨어지지 않도록 최소값을 고정 ##
+        CurrentWaterAmount = Mathf.Max(0, CurrentWaterAmount);
+
         UpdateGrowthPauseState(); // ## 함수 이름 변경 ##
         UpdateScore();
 
