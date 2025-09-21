@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d67f17ba982cbb540947c69477259c66, type: 3}
+  m_Name: Copper PickaxeRecipe 1
+  m_EditorClassIdentifier: 
+  baseItem: {fileID: 11400000, guid: b9cdf1217780540438da8cc09450167b, type: 2}
+  requiredMaterial: {fileID: 11400000, guid: 87491544bd9e3ce498744723e0e75124, type: 2}
+  requiredMaterialCount: 15
+  requiredMoney: 2000
+  resultItem: {fileID: 11400000, guid: 17d7196bf127be14da91d46883dee371, type: 2}
