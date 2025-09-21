@@ -26,4 +26,8 @@ public class Bed : MonoBehaviour, IInteractable
             sleepManager.Wake();
         }
     }
+    public void OnDialogueEnd()
+    {
+        // 침대는 대화를 하지 않으므로, 내용은 비워둡니다.
+    }
 }

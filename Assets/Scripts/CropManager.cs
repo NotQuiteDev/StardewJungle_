@@ -195,7 +195,7 @@ public class CropManager : MonoBehaviour, IInteractable
         float delta = Mathf.Abs(CurrentWaterAmount - optimalWaterAmount);
         float span = Mathf.Max(1e-4f, maxWaterAmount - minWaterAmount);
         float greenHalf = Mathf.Clamp01(greenZoneWidth01) * 0.5f * span;
-        
+
         if (delta <= greenHalf)
         {
             return 1f;
@@ -269,7 +269,7 @@ public class CropManager : MonoBehaviour, IInteractable
     }
 
     // 수확/제거 둘 다 플롯 50% 강등
- // CropManager.cs 의 Interact() 함수
+    // CropManager.cs 의 Interact() 함수
     public void Interact()
     {
         var plot = GetComponentInParent<FarmPlot>();
@@ -279,7 +279,7 @@ public class CropManager : MonoBehaviour, IInteractable
             case CropState.Grown:
                 if (plot != null) plot.OnHarvestedReduceToHalf();
                 // ## 수정: 최종 점수를 계산할 때, 성장 완료 시점의 실시간 평균 점수를 사용 ##
-                float finalScore = CurrentScore; 
+                float finalScore = CurrentScore;
                 HarvestedCropData itemToDrop = null;
 
                 // 점수가 높은 순으로 정렬된 등급 배열을 순회
@@ -309,7 +309,7 @@ public class CropManager : MonoBehaviour, IInteractable
                 {
                     Debug.LogWarning("수확 가능한 아이템이 없습니다. harvestGrades 설정을 확인하세요.");
                 }
-                
+
                 Destroy(gameObject);
                 break;
 
@@ -354,5 +354,10 @@ public class CropManager : MonoBehaviour, IInteractable
         t01 = Mathf.Clamp01(t01);
         float abs = Mathf.Lerp(minWaterAmount, maxWaterAmount, t01);
         SetInitialWaterAbsolute(abs);
+    }
+    
+    public void OnDialogueEnd()
+    {
+        // 작물은 대화를 하지 않으므로, 내용은 비워둡니다.
     }
 }

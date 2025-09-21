@@ -40,7 +40,12 @@ public class ShopUIManager : MonoBehaviour
         GameManager.Instance.EnterUIMode();
         currentMerchant = merchant;
         shopWindowObject.SetActive(true);
-        npcPortraitImage.sprite = currentMerchant.npcPortrait;
+        
+        // ## 수정: merchant에서 직접 초상화를 가져오는 대신, DialogueInfo를 통해 가져옵니다. ##
+        if (merchant.DialogueInfo != null)
+        {
+            npcPortraitImage.sprite = merchant.DialogueInfo.npcPortrait;
+        }
         
         RefreshUI();
     }
