@@ -10,14 +10,10 @@ public class UpgradeUIManager : MonoBehaviour
     [Header("UI 창")]
     [SerializeField] private GameObject upgradeWindow;
 
-    // ## 수정: 좌측 패널(플레이어 인벤토리) 관련 변수 모두 삭제 ##
-    // [SerializeField] private Transform playerInventoryContent;
-    // [SerializeField] private GameObject playerItemSlotPrefab;
-
     [Header("패널 및 프리팹")]
-    [SerializeField] private Transform recipeContentPanel;     // 중앙 패널
+    [SerializeField] private Transform recipeContentPanel;
     [SerializeField] private GameObject recipeSlotPrefab;
-    [SerializeField] private GameObject requirementsPanel;      // 우측 패널
+    [SerializeField] private GameObject requirementsPanel;
 
     [Header("UI 요소 연결")]
     [SerializeField] private Image npcPortrait;
@@ -41,26 +37,32 @@ public class UpgradeUIManager : MonoBehaviour
         closeButton.onClick.AddListener(CloseUpgradeUI);
     }
 
+    // ## 추가: 게임 시작 시 UI를 숨기기 위한 Start 함수 ##
+    private void Start()
+    {
+        upgradeWindow.SetActive(false);
+    }
+
     public void OpenUpgradeUI(BlacksmithNPC blacksmith)
     {
+        // ## 추가: 게임을 'UI 모드'로 전환 (마우스 커서 보이기, 게임 일시정지) ##
+        GameManager.Instance.EnterUIMode();
+
         currentRecipes = blacksmith.GetAvailableRecipes();
         npcPortrait.sprite = blacksmith.npcPortrait;
         upgradeWindow.SetActive(true);
-        // GameManager.Instance.EnterUIMode();
 
-        // ## 수정: 플레이어 인벤토리 채우는 함수 호출 삭제 ##
         PopulateRecipeList();
         ClearRequirementsPanel();
     }
 
     public void CloseUpgradeUI()
     {
+        // ## 추가: 게임을 '게임플레이 모드'로 전환 (마우스 커서 숨기기, 게임 재개) ##
+        GameManager.Instance.EnterGameplayMode();
+
         upgradeWindow.SetActive(false);
-        // GameManager.Instance.EnterGameplayMode();
     }
-    
-    // ## 삭제: 이 함수는 더 이상 필요 없습니다. ##
-    // private void PopulatePlayerInventory() { ... }
 
     private void PopulateRecipeList()
     {
@@ -71,10 +73,7 @@ public class UpgradeUIManager : MonoBehaviour
             slotGO.GetComponent<UpgradeRecipeSlotUI>().Setup(recipe);
         }
     }
-
-    // ## 삭제: 이 함수는 더 이상 필요 없습니다. ##
-    // public void OnPlayerItemClicked(ItemData selectedItem) { ... }
-
+    
     public void OnRecipeSelected(UpgradeRecipeData recipe)
     {
         selectedRecipe = recipe;
@@ -126,8 +125,7 @@ public class UpgradeUIManager : MonoBehaviour
         InventoryManager.Instance.AddItem(selectedRecipe.resultItem, 1);
         
         Debug.Log($"{selectedRecipe.resultItem.itemName}(으)로 업그레이드 성공!");
-
-        // 거래 후 UI 새로고침 (플레이어 인벤토리 목록은 없으니 이 함수만 호출)
+        
         UpdateRequirementsPanel();
     }
 

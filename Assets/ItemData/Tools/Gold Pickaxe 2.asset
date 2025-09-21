@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17e5e8c6ad5229c4ea1d33462a074a50, type: 3}
-  m_Name: Pickaxe
+  m_Name: Gold Pickaxe 2
   m_EditorClassIdentifier: 
-  itemName: Pickaxe
-  itemIcon: {fileID: 21300000, guid: 9a75ccc1b1ecf11429bc255266011111, type: 3}
-  itemPrefab: {fileID: 4083000811892589468, guid: 0942c8b1ee1bb514c9ba9a060ce93f72, type: 3}
+  itemName: Gold Pickaxe
+  itemIcon: {fileID: 21300000, guid: 9bb8860fa26dcaf458c46ed693abc85d, type: 3}
+  itemPrefab: {fileID: 4083000811892589468, guid: aab62af3bc489094bb212298ec177be0, type: 3}
   sellPrice: 0
-  damagePerSwing: 20
-  swingCooldown: 0.5
+  damagePerSwing: 150
+  swingCooldown: 0.2
   raycastDistance: 5
   mineableMask:
     serializedVersion: 2

@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d2a89c6210d3774c9eef877e0309e0e, type: 3}
-  m_Name: iron_watercan 1
+  m_Name: Copper_watercan
   m_EditorClassIdentifier: 
-  itemName: Iron Watering Can
-  itemIcon: {fileID: 21300000, guid: 2a126abf873c32242b8fa358b483515c, type: 3}
-  itemPrefab: {fileID: 6039387780736191232, guid: 828a43d00d2d50b42931ac8fbccaedad, type: 3}
+  itemName: Copper Watering Can
+  itemIcon: {fileID: 21300000, guid: 41c6b5b86cf1a654695c58412b5c5b15, type: 3}
+  itemPrefab: {fileID: 6039387780736191232, guid: 29c6213e2eef30540823e2308dc4af9c, type: 3}
   sellPrice: 0
   waterParticlesPrefab: {fileID: 2576731684681040835, guid: a8103ea57cfc9f243a538a77f2ecc107, type: 3}
-  waterPerSecond: 300
+  waterPerSecond: 200
   raycastDistance: 5
   sprayRadius: 0.5
-  sprayLength: 3
+  sprayLength: 2.5
   waterableLayer:
     serializedVersion: 2
     m_Bits: 64
