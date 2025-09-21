@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI; // UI.Slider 사용을 위해 추가
+using UnityEngine.UI;
 
 public class StaminaManager : MonoBehaviour
 {
@@ -7,7 +7,6 @@ public class StaminaManager : MonoBehaviour
 
     [Header("스태미나 설정")]
     [SerializeField] private float maxStamina = 100f;
-    [SerializeField] private float staminaRegenPerSecond = 2f; // 초당 회복량
     [SerializeField] private Slider staminaBar; // UI 슬라이더 연결
 
     private float currentStamina;
@@ -28,13 +27,7 @@ public class StaminaManager : MonoBehaviour
 
     private void Update()
     {
-        // 자연 회복 로직
-        if (currentStamina < maxStamina)
-        {
-            currentStamina += staminaRegenPerSecond * Time.deltaTime;
-            currentStamina = Mathf.Min(currentStamina, maxStamina);
-            UpdateStaminaBar();
-        }
+        // ## 자연 회복 로직을 이 함수에서 완전히 제거했습니다. ##
     }
 
     public bool UseStamina(float amount)
@@ -45,20 +38,14 @@ public class StaminaManager : MonoBehaviour
             UpdateStaminaBar();
             return true; // 사용 성공
         }
-        // 여기에 "스태미나가 부족합니다!" 같은 UI 피드백을 추가할 수 있습니다.
         return false; // 사용 실패
     }
 
+    // SleepManager가 이 함수를 호출하여 스태미나를 회복시킵니다.
     public void RestoreStamina(float amount)
     {
         currentStamina += amount;
         currentStamina = Mathf.Min(currentStamina, maxStamina);
-        UpdateStaminaBar();
-    }
-    
-    public void RestoreStaminaToFull()
-    {
-        currentStamina = maxStamina;
         UpdateStaminaBar();
     }
 

@@ -15,9 +15,9 @@ public class WateringCanRuntime : MonoBehaviour
     // 메인 동작 코루틴 및 상태
     private Coroutine _loop;
     private bool _isWatering = false;
-
-    // ## '틱' 방식 스태미나 소모를 위한 누적 변수 ##
-    private float staminaUsageAccumulator = 0f;
+    
+    // ## 삭제: 더 이상 '틱' 방식의 누적 변수는 필요 없습니다. ##
+    // private float staminaUsageAccumulator = 0f;
 
     // 물리 히트 & 크롭 버퍼(고정 크기, GC 없음)
     private const int MaxHits = 64;
@@ -26,17 +26,10 @@ public class WateringCanRuntime : MonoBehaviour
 
     [Header("Visual")]
     [SerializeField] private bool forceHorizontalParticleDirection = true;
-
-    // -----------------------
-    // 공개 API
-    // -----------------------
+    
     public void StartWatering(WateringCanData data, Transform equip, Transform cam)
     {
-        // 스태미나가 0 이하면 아예 시작하지 않도록 방지
-        if (StaminaManager.Instance.CurrentStamina <= 0)
-        {
-            return;
-        }
+        if (StaminaManager.Instance.CurrentStamina <= 0) return;
 
         _data = data;
         _equip = equip;
@@ -53,55 +46,40 @@ public class WateringCanRuntime : MonoBehaviour
             }
             if (!_ps.isPlaying) _ps.Play(true);
         }
-
         _isWatering = true;
-        staminaUsageAccumulator = 0f; // 사용 시작 시 누적기 초기화
     }
 
     public void StopWatering()
     {
         if (!_isWatering) return;
         _isWatering = false;
-        staminaUsageAccumulator = 0f; // 사용 중지 시 누적기 초기화
 
         if (_ps != null)
             _ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
     }
-
-    // -----------------------
-    // 내부 루프
-    // -----------------------
+    
     private IEnumerator WaterLoop()
     {
         while (true)
         {
-            // 물을 뿌리는 중일 때만 아래 로직 실행
             if (_isWatering && _cam != null && _data != null)
             {
-                // 파티클 비주얼 업데이트
-                UpdateParticleTransform();
+                // ## 핵심 수정: 매 프레임마다 사용한 시간만큼 스태미나를 소모합니다. ##
+                // 1. 이번 프레임에 소모할 스태미나 양을 계산합니다.
+                float staminaToConsume = _data.staminaCost * Time.deltaTime;
 
-                // ## 새로운 '틱' 방식 스태미나 소모 로직 ##
-                // 1. 매 프레임 물을 사용한 시간을 누적합니다.
-                staminaUsageAccumulator += Time.deltaTime;
-
-                // 2. 누적 시간이 1초를 넘으면 스태미나를 소모합니다.
-                if (staminaUsageAccumulator >= 1f)
+                // 2. 스태미나를 소모하고, 실패하면 물뿌리개를 즉시 멈춥니다.
+                if (!StaminaManager.Instance.UseStamina(staminaToConsume))
                 {
-                    staminaUsageAccumulator -= 1f; // 정확히 1초만큼만 차감 (0.05초 등 나머지 시간은 유지)
-                    
-                    if (!StaminaManager.Instance.UseStamina(_data.staminaCost))
-                    {
-                        StopWatering(); // 스태미나가 부족하면 물뿌리기를 강제로 멈춥니다.
-                        continue;       // 이번 프레임의 물주기 로직은 건너뜁니다.
-                    }
+                    StopWatering();
+                    continue; // 이번 프레임의 나머지 로직(물주기)은 건너뜁니다.
                 }
-                
-                // 작물에 물을 적용하는 로직
+
+                // (스태미나 소모에 성공했을 때만 아래 로직이 실행됩니다)
+                UpdateParticleTransform();
                 ApplyWaterToCrops();
             }
-
-            yield return null; // 다음 프레임까지 대기
+            yield return null;
         }
     }
 
@@ -114,44 +92,25 @@ public class WateringCanRuntime : MonoBehaviour
 
         int layerMask = (_data.waterableLayer.value == 0) ? Physics.DefaultRaycastLayers : _data.waterableLayer.value;
         int hitCount = Physics.OverlapCapsuleNonAlloc(p0, p1, _data.sprayRadius, _hits, layerMask);
-
-        // 중복되지 않는 CropManager 수집
+        
         int uniqueCount = 0;
         for (int i = 0; i < hitCount && uniqueCount < MaxHits; i++)
         {
-            var col = _hits[i];
-            if (!col) continue;
-            var crop = col.GetComponentInParent<CropManager>();
+            var crop = _hits[i]?.GetComponentInParent<CropManager>();
             if (crop == null) continue;
-
             bool seen = false;
-            for (int k = 0; k < uniqueCount; k++)
-            {
-                if (_crops[k] == crop) { seen = true; break; }
-            }
+            for (int k = 0; k < uniqueCount; k++) { if (_crops[k] == crop) { seen = true; break; } }
             if (!seen) _crops[uniqueCount++] = crop;
         }
 
-        // 물 적용
         float dtAmount = _data.waterPerSecond * Time.deltaTime;
         if (uniqueCount > 0)
         {
             float each = _data.distributeWaterEvenly ? (dtAmount / uniqueCount) : dtAmount;
             for (int i = 0; i < uniqueCount; i++)
             {
-                var crop = _crops[i];
-                if (crop != null) crop.WaterCrop(each);
-                _crops[i] = null; // 다음 프레임을 위해 버퍼 비우기
-            }
-        }
-        else
-        {
-            // 백업용 단일 레이캐스트
-            Ray ray = new Ray(origin, dirH);
-            if (Physics.Raycast(ray, out RaycastHit hit, _data.raycastDistance, layerMask))
-            {
-                var crop = hit.collider.GetComponentInParent<CropManager>();
-                if (crop != null) crop.WaterCrop(dtAmount);
+                _crops[i]?.WaterCrop(each);
+                _crops[i] = null;
             }
         }
     }
@@ -182,10 +141,7 @@ public class WateringCanRuntime : MonoBehaviour
         }
         return d.normalized;
     }
-
-    // -----------------------
-    // 유니티 생명주기 함수
-    // -----------------------
+    
     private void OnEnable()
     {
         if (_loop == null) _loop = StartCoroutine(WaterLoop());
@@ -193,11 +149,8 @@ public class WateringCanRuntime : MonoBehaviour
 
     private void OnDisable()
     {
-        StopWatering(); // 비활성화될 때 무조건 중지
-
-        if (_ps != null)
-            _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-
+        StopWatering();
+        if (_ps != null) _ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         if (_loop != null)
         {
             StopCoroutine(_loop);
@@ -207,33 +160,24 @@ public class WateringCanRuntime : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 오브젝트 파괴 시 모든 것 정리
         StopWatering();
         if (_loop != null)
         {
             StopCoroutine(_loop);
             _loop = null;
         }
-        
         if (_psGO != null)
         {
             Destroy(_psGO);
-            _psGO = null;
-            _ps = null;
         }
     }
-
-    // -----------------------
-    // 유틸리티
-    // -----------------------
+    
     private void EnsureParticleExists()
     {
         if (_ps != null) return;
         if (_data == null || _data.waterParticlesPrefab == null) return;
-
         _psGO = Instantiate(_data.waterParticlesPrefab);
         _ps = _psGO.GetComponent<ParticleSystem>();
-
         if (_ps != null)
         {
             var main = _ps.main;
@@ -242,11 +186,4 @@ public class WateringCanRuntime : MonoBehaviour
             main.stopAction = ParticleSystemStopAction.None;
         }
     }
-
-    #if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        // (기즈모 코드는 디버깅용이므로 기존과 동일하게 유지)
-    }
-    #endif
 }
