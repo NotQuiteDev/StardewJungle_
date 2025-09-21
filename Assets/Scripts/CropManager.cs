@@ -54,6 +54,9 @@ public class CropManager : MonoBehaviour, IInteractable
     [Tooltip("점수가 높은 순서대로(내림차순) 정렬해주세요!")]
     [SerializeField] private HarvestGrade[] harvestGrades;
 
+    // ## 추가: 실시간 평균 계산을 위한 '실제 경과 시간' 변수 ##
+    private float totalTimeElapsed = 0f;
+
     // UI/외부에서 읽기용
     public float GreenZoneWidth01 => greenZoneWidth01;
     public float FalloffExponent => falloffExponent;
@@ -86,6 +89,7 @@ public class CropManager : MonoBehaviour, IInteractable
     // 런타임으로 초기 수분 주입을 지원하기 위한 임시 저장소
     private bool hasPendingInitialWater = false;
     private float pendingInitialWater = 0f;
+    private bool isGrowthPaused = false; // ## 추가: 성장 멈춤 상태 변수 ##
 
     private void Awake()
     {
@@ -133,10 +137,22 @@ public class CropManager : MonoBehaviour, IInteractable
     {
         if (State != CropState.Growing) return;
 
+        // ## 수정: '실제 경과 시간'은 항상 증가 ##
+        totalTimeElapsed += Time.deltaTime;
+
         // 성장
         if (growthTimer < growthDuration)
         {
-            growthTimer += Time.deltaTime;
+            // ## 수정: 성장이 멈추지 않았을 때만 시간이 흐르도록 변경 ##
+            if (!isGrowthPaused)
+            {
+                growthTimer += Time.deltaTime;
+
+                // ## 수정: 성장이 진행될 때만 품질을 누적 ##
+                float quality = CalculateInstantQuality();
+                qualityAccum += quality * Time.deltaTime;
+
+            }
             cropVisuals.localScale = Vector3.Lerp(startScale, maxScale, growthTimer / growthDuration);
         }
         else
@@ -146,8 +162,8 @@ public class CropManager : MonoBehaviour, IInteractable
 
         // 수분 감소 + 점수
         CurrentWaterAmount -= waterLossPerSecond * Time.deltaTime;
+        UpdateGrowthPauseState(); // ## 함수 이름 변경 ##
         UpdateScore();
-        CheckDeathCondition();
 
         // ## 수정된 부분: 디버그 로그 ##
         // =======================================================================
@@ -170,6 +186,27 @@ public class CropManager : MonoBehaviour, IInteractable
         }
     }
 
+    // ## 분리: 매 순간의 품질(0~1)을 계산하는 로직 ##
+    private float CalculateInstantQuality()
+    {
+        float delta = Mathf.Abs(CurrentWaterAmount - optimalWaterAmount);
+        float span = Mathf.Max(1e-4f, maxWaterAmount - minWaterAmount);
+        float greenHalf = Mathf.Clamp01(greenZoneWidth01) * 0.5f * span;
+        
+        if (delta <= greenHalf)
+        {
+            return 1f;
+        }
+        else
+        {
+            float over = delta - greenHalf;
+            float sideSpan = (CurrentWaterAmount >= optimalWaterAmount) ? (maxWaterAmount - optimalWaterAmount) : (optimalWaterAmount - minWaterAmount);
+            float denom = Mathf.Max(1e-4f, sideSpan - greenHalf);
+            float t = Mathf.Clamp01(over / denom);
+            return 1f - Mathf.Pow(t, falloffExponent);
+        }
+    }
+
     /// <summary>
     /// UI가 바로 쓸 수 있는 정규화 값(0..1)들 반환:
     /// pCur=현재, pOpt=최적, pL/pR=그린존 좌/우.
@@ -183,47 +220,20 @@ public class CropManager : MonoBehaviour, IInteractable
         pR = Mathf.Clamp01(pOpt + half);
     }
 
+    // ## 수정: 점수 계산 방식을 실시간 평균으로 변경 ##
     private void UpdateScore()
     {
-        float min = minWaterAmount;
-        float max = maxWaterAmount;
-        float opt = optimalWaterAmount;
-
-        float span = Mathf.Max(1e-4f, max - min);
-        float left = opt - min;      // 최적→왼쪽 경계 거리
-        float right = max - opt;     // 최적→오른쪽 경계 거리
-
-        float greenHalf = Mathf.Clamp01(greenZoneWidth01) * 0.5f * span;
-
-        float delta = Mathf.Abs(CurrentWaterAmount - opt);
-
-        float quality; // 0..1
-
-        if (delta <= greenHalf)
-        {
-            quality = 1f;
-        }
-        else
-        {
-            float over = delta - greenHalf;
-            float denom = (CurrentWaterAmount >= opt)
-                ? Mathf.Max(1e-4f, right - greenHalf)
-                : Mathf.Max(1e-4f, left - greenHalf);
-
-            float t = Mathf.Clamp01(over / denom);
-            quality = 1f - Mathf.Pow(t, falloffExponent);
-        }
-
-        qualityAccum += quality * Time.deltaTime;
-        CurrentScore = Mathf.Clamp01(qualityAccum / Mathf.Max(1e-4f, growthDuration)) * 100f;
+        // 실시간 평균 점수 = (지금까지 쌓인 총 품질) / (지금까지 흐른 총 시간)
+        CurrentScore = (qualityAccum / Mathf.Max(1e-4f, totalTimeElapsed)) * 100f;
     }
 
-    private void CheckDeathCondition()
+    private void UpdateGrowthPauseState()
     {
-        // 물이 최소치보다 적거나 같을 때만 죽도록 조건을 변경한다.
+        // 물이 최소치보다 적거나 같으면 성장을 멈춘다.
         if (CurrentWaterAmount <= minWaterAmount)
         {
-            Die();
+            isGrowthPaused = true;
+            // 여기에 목마를 때 작물 색을 바꾸는 등 시각적 효과를 추가할 수 있습니다.
         }
     }
 
@@ -232,8 +242,14 @@ public class CropManager : MonoBehaviour, IInteractable
         if (State == CropState.Growing)
         {
             CurrentWaterAmount += amount;
-            // 물을 준 후에, 최대 수분량을 넘지 않도록 값을 제한(Clamp)한다.
             CurrentWaterAmount = Mathf.Min(CurrentWaterAmount, maxWaterAmount);
+
+            // ## 추가: 물을 줘서 수분량이 회복되면 성장 멈춤 상태를 해제 ##
+            if (isGrowthPaused && CurrentWaterAmount > minWaterAmount)
+            {
+                isGrowthPaused = false;
+                // 여기에 원래 작물 색으로 되돌리는 등 시각적 효과를 추가할 수 있습니다.
+            }
         }
     }
 
@@ -259,9 +275,8 @@ public class CropManager : MonoBehaviour, IInteractable
         {
             case CropState.Grown:
                 if (plot != null) plot.OnHarvestedReduceToHalf();
-
-                // ## 수확 로직 시작 ##
-                float finalScore = CurrentScorePercent;
+                // ## 수정: 최종 점수를 계산할 때, 성장 완료 시점의 실시간 평균 점수를 사용 ##
+                float finalScore = CurrentScore; 
                 HarvestedCropData itemToDrop = null;
 
                 // 점수가 높은 순으로 정렬된 등급 배열을 순회
