@@ -43,8 +43,14 @@ public class PlayerInteraction : MonoBehaviour
     /// <summary>
     /// Input System에 의해 Interact 액션이 발동될 때 호출되는 함수입니다.
     /// </summary>
+/// <summary>
+/// Input System에 의해 Interact 액션이 발동될 때 호출되는 함수입니다.
+/// </summary>
     private void OnInteract(InputAction.CallbackContext context)
     {
+        // ## 핵심 수정: 게임 상태가 'Gameplay'가 아닐 경우, 상호작용을 실행하지 않고 즉시 함수를 탈출! ##
+        if (GameManager.Instance.CurrentState != GameManager.GameState.Gameplay) return;
+
         // 가장 가까운 상호작용 대상이 있을 경우에만 Interact() 함수를 실행합니다.
         if (closestInteractable != null)
         {
