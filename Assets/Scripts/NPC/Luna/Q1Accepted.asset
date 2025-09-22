@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: Q1Accepted
+  m_EditorClassIdentifier: 
+  npcName: Luna
+  npcPortrait: {fileID: 21300000, guid: c7532d02a078fd94d92fd3e7a4f5cede, type: 3}
+  dialogueLines:
+  - Then it is decided. Together, we shall prepare the true Offering of the Harvest
+    Festival. The altar must be awakened with all seven hues in their purest, golden
+    form.
+  - 'Red, for the lifeblood of the land.
+
+    Orange, for the warmth of the sun.
+
+'
+  - 'Yellow, for the hope of tomorrow.
+
+    Green, for the breath of nature.
+
+
+
+'
+  - "Sky Blue, for the endless sky that shelters us.\nBlue, for the deep wisdom of
+    the earth\u2019s waters.\n\n\n"
+  - 'And Purple, for the mystery that binds all colors into harmony.
+
+
+'
+  - "Bring me 7 golden grade crops, one of each hue, and the altar will shine with
+    the spirit\u2019s blessing once more.\n"
+  choices: []

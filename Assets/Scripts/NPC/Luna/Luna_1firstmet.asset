@@ -38,3 +38,49 @@ MonoBehaviour:
     conditions: []
     showAsDisabledIfNotMet: 0
     results: []
+  - choiceText: "I\u2019ll do it."
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 1a37bad8de978b94b9e7f6282e21c5c6, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results:
+    - resultType: 1
+      targetQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      itemsToTake: []
+      itemCountToTake: 0
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 0
+  - choiceText: The Rainbow Offering
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 194b21ac31795ff4d9cc25fb38e2effc, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Awaken the Spirit
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 7dcda7bbd9ec7664c870c35997b05a2e, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      requiredStatus: 2
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []

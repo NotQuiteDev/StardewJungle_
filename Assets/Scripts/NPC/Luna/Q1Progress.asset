@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: Q1Progress
+  m_EditorClassIdentifier: 
+  npcName: Luna
+  npcPortrait: {fileID: 21300000, guid: c7532d02a078fd94d92fd3e7a4f5cede, type: 3}
+  dialogueLines:
+  - Have you gathered the seven golden crops, child of the earth?
+  choices:
+  - choiceText: "Yes, I\u2019ve brought them."
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 2630d9dae57336e4b81c73ab7c3a511a, type: 2}
+    conditions:
+    - conditionType: 1
+      requiredQuest: {fileID: 0}
+      requiredStatus: 0
+      requiredItems:
+      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      - {fileID: 11400000, guid: b36f9bfdc2364aa48a56fda18b7bbe39, type: 2}
+      - {fileID: 11400000, guid: 259286b6b5749d946930a1fbe5b4241e, type: 2}
+      - {fileID: 11400000, guid: f2f014941080e5447a035691f5c99196, type: 2}
+      - {fileID: 11400000, guid: 25da24c5c94760a4f9ad3fdbff836fb2, type: 2}
+      - {fileID: 11400000, guid: 03169a15eb48a394181d908ccf9f7779, type: 2}
+      - {fileID: 11400000, guid: fcd62095813bf3f47956641a2280e6f3, type: 2}
+      requiredItemCount: 1
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 1
+    results:
+    - resultType: 5
+      targetQuest: {fileID: 0}
+      itemsToTake: []
+      itemCountToTake: 0
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 10000
+    - resultType: 2
+      targetQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      itemsToTake: []
+      itemCountToTake: 0
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 10000
+    - resultType: 3
+      targetQuest: {fileID: 11400000, guid: 4c6372ea0501a2e4293f2ef9fbf85658, type: 2}
+      itemsToTake:
+      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      - {fileID: 11400000, guid: b36f9bfdc2364aa48a56fda18b7bbe39, type: 2}
+      - {fileID: 11400000, guid: 259286b6b5749d946930a1fbe5b4241e, type: 2}
+      - {fileID: 11400000, guid: f2f014941080e5447a035691f5c99196, type: 2}
+      - {fileID: 11400000, guid: 25da24c5c94760a4f9ad3fdbff836fb2, type: 2}
+      - {fileID: 11400000, guid: 03169a15eb48a394181d908ccf9f7779, type: 2}
+      - {fileID: 11400000, guid: fcd62095813bf3f47956641a2280e6f3, type: 2}
+      itemCountToTake: 1
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 10000
+  - choiceText: Not yet.
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: db03420f6e7ab3946a1a5b994d2994d1, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
