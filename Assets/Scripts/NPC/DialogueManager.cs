@@ -187,7 +187,7 @@ private bool AreConditionsMet(DialogueChoice choice)
                     }
                     if (allItemsFound) conditionMet = true;
                 }
-                else // OR 논리
+                else if (condition.itemLogic == ConditionLogic.OR)
                 {
                     // OR 논리: 아이템 중 하나라도 가지고 있는지 확인
                     foreach (var item in condition.requiredItems)
@@ -197,6 +197,21 @@ private bool AreConditionsMet(DialogueChoice choice)
                             conditionMet = true;
                             break; // 하나라도 찾으면 즉시 통과
                         }
+                    }
+                }
+                // ## 핵심 추가: OR_TOTAL 로직 ##
+                else if (condition.itemLogic == ConditionLogic.OR_TOTAL)
+                {
+                    int totalCount = 0;
+                    // 지정된 모든 아이템의 개수를 합산합니다.
+                    foreach (var item in condition.requiredItems)
+                    {
+                        totalCount += InventoryManager.Instance.GetItemCount(item);
+                    }
+                    // 합산된 총 개수가 요구 수량 이상인지 확인합니다.
+                    if (totalCount >= condition.requiredItemCount)
+                    {
+                        conditionMet = true;
                     }
                 }
                 break;
@@ -288,7 +303,7 @@ private void ExecuteChoiceResult(ChoiceResult result)
                     InventoryManager.Instance.RemoveItem(item, result.itemCountToTake);
                 }
             }
-            else // OR 논리
+            else if (result.itemTakeLogic == ConditionLogic.OR)
             {
                 // OR 논리: 플레이어가 가진 첫 번째 아이템을 찾아 제거
                 foreach (var item in result.itemsToTake)
@@ -298,6 +313,31 @@ private void ExecuteChoiceResult(ChoiceResult result)
                         InventoryManager.Instance.RemoveItem(item, result.itemCountToTake);
                         Debug.Log($"{item.itemName} {result.itemCountToTake}개를 전달했습니다. (OR 조건)");
                         break; // 하나만 제거하고 중단
+                    }
+                }
+            }
+            // ## 핵심 추가: OR_TOTAL 로직 ##
+            else if (result.itemTakeLogic == ConditionLogic.OR_TOTAL)
+            {
+                int remainingToRemove = result.itemCountToTake;
+                // 등록된 아이템 배열의 순서대로 차감합니다.
+                foreach (var item in result.itemsToTake)
+                {
+                    int countOnHand = InventoryManager.Instance.GetItemCount(item);
+                    if (countOnHand > 0)
+                    {
+                        // 현재 아이템 스택에서 제거할 양을 계산합니다.
+                        // (남은 요구 수량과 현재 가진 양 중 더 적은 쪽을 선택)
+                        int amountToRemove = Mathf.Min(remainingToRemove, countOnHand);
+                        
+                        InventoryManager.Instance.RemoveItem(item, amountToRemove);
+                        remainingToRemove -= amountToRemove;
+
+                        // 요구 수량을 모두 채웠으면 즉시 중단합니다.
+                        if (remainingToRemove <= 0)
+                        {
+                            break;
+                        }
                     }
                 }
             }

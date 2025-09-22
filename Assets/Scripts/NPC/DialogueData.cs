@@ -30,8 +30,9 @@ public enum ChoiceResultType
 // ## 추가: 조건 논리를 정의하는 Enum (AND/OR) ##
 public enum ConditionLogic
 {
-    AND, // 목록에 있는 모든 조건을 만족해야 함
-    OR   // 목록에 있는 조건 중 하나라도 만족하면 됨
+    AND,       // 목록의 모든 아이템을 각각 요구함
+    OR,        // 목록의 아이템 중 하나라도 요구 수량을 만족하면 됨
+    OR_TOTAL   // ## 추가: 목록에 있는 아이템들의 '총합'이 요구 수량을 만족하면 됨
 }
 
 // ## 여기가 중요! ##
