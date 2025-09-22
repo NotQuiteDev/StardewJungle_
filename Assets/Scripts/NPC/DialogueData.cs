@@ -11,6 +11,26 @@ public enum ChoiceActionType
     StartNewDialogue // 다른 대화 시작
 }
 
+public enum ChoiceResultType
+{
+    DoNothing,      // 아무것도 안 함
+    StartQuest,     // 퀘스트 시작 (NotStarted -> InProgress)
+    CompleteQuest,  // 퀘스트 완료 (InProgress -> Completed)
+    GiveItem,       // (미구현) 아이템 주기
+    TakeItem        // (미구현) 아이템 뺏기
+}
+
+[System.Serializable]
+public class ChoiceResult
+{
+    public ChoiceResultType resultType;
+
+    [Header("Quest 관련")]
+    public QuestData targetQuest; // 상태를 변경할 퀘스트
+}
+
+
+
 public enum ConditionType
 {
     HasQuest   // 특정 퀘스트의 상태를 조건으로
@@ -41,6 +61,10 @@ public class DialogueChoice
     // ## 핵심 추가: 이 선택지가 보이려면 만족해야 하는 조건들 목록 ##
     [Header("선택지 표시 조건")]
     public ChoiceCondition[] conditions;
+
+    // ## 핵심 추가: 이 선택지를 골랐을 때 발생하는 결과들 ##
+    [Header("선택지 결과")]
+    public ChoiceResult[] results;
 
 
 }

@@ -20,9 +20,20 @@ MonoBehaviour:
   - choiceText: look shop
     actionType: 1
     nextDialogue: {fileID: 0}
+    conditions: []
+    results: []
+  - choiceText: Do you need any help?
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 355a7c18bacd2804b8e284ed5407a209, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
+      requiredStatus: 0
+    results:
+    - resultType: 0
+      targetQuest: {fileID: 0}
   - choiceText: Do Nothing
     actionType: 0
     nextDialogue: {fileID: 0}
-  - choiceText: Where is it?
-    actionType: 3
-    nextDialogue: {fileID: 0}
+    conditions: []
+    results: []

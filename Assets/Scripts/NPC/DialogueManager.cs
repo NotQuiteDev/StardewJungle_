@@ -165,21 +165,27 @@ private bool AreConditionsMet(DialogueChoice choice)
     // ## 수정: 파라미터로 ChoiceActionType 대신 DialogueChoice 전체를 받습니다. ##
     private void PerformChoiceAction(DialogueChoice choice)
     {
+        // ## 핵심 추가: 선택지에 정의된 모든 '결과(Result)'를 순서대로 실행 ##
+        foreach (var result in choice.results)
+        {
+            ExecuteChoiceResult(result);
+        }
+
+        // --- 기존의 actionType 처리 로직은 그대로 유지 ---
+
         // 새로운 대화를 시작하는 경우, 대화창을 닫지 않고 바로 새 대화를 시작합니다.
         if (choice.actionType == ChoiceActionType.StartNewDialogue)
         {
-            // ## 핵심 추가: 새로운 대화 데이터가 할당되어 있다면 다음 대화를 시작합니다. ##
             if (choice.nextDialogue != null)
             {
-                // 현재 대화창의 내용을 새 대화 내용으로 교체합니다.
                 StartDialogue(choice.nextDialogue, currentInteractor);
             }
             else
             {
-                Debug.LogWarning("다음 대화가 지정되지 않았지만 StartNewDialogue 액션이 호출되었습니다. 대화를 종료합니다.");
+                Debug.LogWarning("다음 대화가 지정되지 않았습니다. 대화를 종료합니다.");
                 EndDialogue();
             }
-            return; // 아래의 로직을 실행하지 않고 함수 종료
+            return;
         }
 
         // 그 외의 액션들은 기존처럼 대화창을 닫고 각자의 행동을 수행합니다.
@@ -199,6 +205,27 @@ private bool AreConditionsMet(DialogueChoice choice)
                 break;
             case ChoiceActionType.DoNothing:
                 GameManager.Instance.EnterGameplayMode();
+                break;
+        }
+    }
+
+    // ## 핵심 추가: ChoiceResult를 실제로 실행하는 새로운 함수 ##
+    private void ExecuteChoiceResult(ChoiceResult result)
+    {
+        switch (result.resultType)
+        {
+            case ChoiceResultType.StartQuest:
+                // QuestManager에게 퀘스트 상태를 InProgress로 바꿔달라고 요청
+                QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.InProgress);
+                break;
+
+            case ChoiceResultType.CompleteQuest:
+                // QuestManager에게 퀘스트 상태를 Completed로 바꿔달라고 요청
+                QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.Completed);
+                break;
+            
+            case ChoiceResultType.DoNothing:
+                // 아무것도 하지 않음
                 break;
         }
     }
