@@ -123,44 +123,57 @@ public class DialogueManager : MonoBehaviour
         choicesPanel.gameObject.SetActive(true);
         foreach (Transform child in choicesPanel) { Destroy(child.gameObject); }
 
-        // ## 핵심 수정: 버튼을 만들기 전에 조건 확인 로직을 추가 ##
         foreach (var choice in currentDialogueData.choices)
         {
-            // 이 선택지의 모든 조건이 충족되었는지 확인합니다.
-            if (AreConditionsMet(choice)) 
+            bool conditionsMet = AreConditionsMet(choice);
+
+            // 이 선택지를 화면에 표시해야 하는가?
+            // 1. 조건을 만족했거나 (conditionsMet = true)
+            // 2. 조건을 만족하지 못했더라도 '비활성화로 보이기' 옵션이 켜져있을 때 (choice.showAsDisabledIfNotMet = true)
+            if (conditionsMet || choice.showAsDisabledIfNotMet)
             {
-                // 조건이 충족된 선택지만 버튼으로 만듭니다.
                 GameObject choiceButtonGO = Instantiate(choiceButtonPrefab, choicesPanel);
                 var buttonText = choiceButtonGO.GetComponentInChildren<TextMeshProUGUI>();
                 var button = choiceButtonGO.GetComponent<Button>();
 
                 buttonText.text = choice.choiceText;
-                button.onClick.AddListener(() => {
-                    PerformChoiceAction(choice);
-                });
+
+                // 버튼의 활성화 상태는 오직 '조건 만족 여부'에 따라 결정됩니다.
+                button.interactable = conditionsMet;
+
+                // 버튼이 활성화 상태일 때만 클릭 이벤트를 연결합니다.
+                if (conditionsMet)
+                {
+                    button.onClick.AddListener(() =>
+                    {
+                        PerformChoiceAction(choice);
+                    });
+                }
             }
+            // 위 두 경우가 아니면 (조건 불만족 + 비활성화 옵션 꺼짐) 버튼을 아예 만들지 않으므로, 선택지는 숨겨집니다.
         }
     }
+
 
     // ## 핵심 추가: 선택지의 조건들을 확인하는 새로운 함수 ##
-// ## 핵심 수정: Quest 조건만 확인하도록 함수 내부를 간소화합니다. ##
-private bool AreConditionsMet(DialogueChoice choice)
-{
-    foreach (var condition in choice.conditions)
+    // ## 핵심 수정: Quest 조건만 확인하도록 함수 내부를 간소화합니다. ##
+    private bool AreConditionsMet(DialogueChoice choice)
     {
-        // 이제 조건 타입이 HasQuest 하나뿐이므로 switch 문이 필요 없습니다.
-        QuestStatus currentStatus = QuestManager.Instance.GetQuestStatus(condition.requiredQuest);
-
-        // 현재 상태가 조건과 일치하지 않으면, 즉시 false를 반환합니다.
-        if (currentStatus != condition.requiredStatus)
+        foreach (var condition in choice.conditions)
         {
-            return false;
-        }
-    }
+            // 이제 조건 타입이 HasQuest 하나뿐이므로 switch 문이 필요 없습니다.
+            QuestStatus currentStatus = QuestManager.Instance.GetQuestStatus(condition.requiredQuest);
 
-    // 모든 퀘스트 조건을 통과했으면 true를 반환합니다.
-    return true;
-}
+            // 현재 상태가 조건과 일치하지 않으면, 즉시 false를 반환합니다.
+            if (currentStatus != condition.requiredStatus)
+            {
+                return false;
+            }
+        }
+
+        // 모든 퀘스트 조건을 통과했으면 true를 반환합니다.
+        return true;
+    }
 
     // ## 수정: 파라미터로 ChoiceActionType 대신 DialogueChoice 전체를 받습니다. ##
     private void PerformChoiceAction(DialogueChoice choice)

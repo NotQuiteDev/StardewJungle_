@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
-  m_Name: "\uD53C\uC5D0\uB974_\uD018\uC2A4\uD2B8\uAC70\uC808\uB2F9\uD588\uC744\uB54C"
+  m_Name: "\uD53C\uC5D0\uB974_\uB2E4\uC74C\uC5D0\uB610\uC624\uC138\uC694"
   m_EditorClassIdentifier: 
   npcName: Pierr
   npcPortrait: {fileID: 21300000, guid: e8eaeefc7d26d534fa03dc54939dcd6c, type: 3}
   dialogueLines:
-  - "O-Oh\u2026 I see\u2026 I guess I was asking for too much\u2026"
+  - "Don\u2019t forget me, promise?"
   choices: []

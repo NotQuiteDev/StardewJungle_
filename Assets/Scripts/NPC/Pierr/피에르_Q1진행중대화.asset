@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: "\uD53C\uC5D0\uB974_Q1\uC9C4\uD589\uC911\uB300\uD654"
+  m_EditorClassIdentifier: 
+  npcName: Pierr
+  npcPortrait: {fileID: 21300000, guid: e8eaeefc7d26d534fa03dc54939dcd6c, type: 3}
+  dialogueLines:
+  - "Um\u2026 Actually, could you bring me just one Red Crop? Any grade is fine\u2026
+    I just need one for a special recipe."
+  choices:
+  - choiceText: "Sure, I\u2019ll get it for you."
+    actionType: 0
+    nextDialogue: {fileID: 0}
+    conditions: []
+    results:
+    - resultType: 1
+      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
+  - choiceText: Not my problem.
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 8d5c7e8dc4d4e6740a23bf41415d04e7, type: 2}
+    conditions: []
+    results: []

@@ -9704,8 +9704,6 @@ MonoBehaviour:
     price: 150
   - item: {fileID: 11400000, guid: fac3fc7619b798b45b5ee9ce42af9c22, type: 2}
     price: 200
-  - item: {fileID: 11400000, guid: a0caf81554eb2064ea53020429d2641a, type: 2}
-    price: 5000
   - item: {fileID: 11400000, guid: 4ec9276398cbdac44a1c366b27c65512, type: 2}
     price: 100
   - item: {fileID: 11400000, guid: f6431dca928a9aa4aa7060527ef439ea, type: 2}

@@ -17,7 +17,7 @@ MonoBehaviour:
   dialogueLines:
   - Heeey! Welcome to my little shop of treasures! Take a look around, okay?
   choices:
-  - choiceText: look shop
+  - choiceText: Shop
     actionType: 1
     nextDialogue: {fileID: 0}
     conditions: []
@@ -33,7 +33,7 @@ MonoBehaviour:
     - resultType: 0
       targetQuest: {fileID: 0}
   - choiceText: Do Nothing
-    actionType: 0
-    nextDialogue: {fileID: 0}
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: ecc211754d360f640badc4cbd409d257, type: 2}
     conditions: []
     results: []

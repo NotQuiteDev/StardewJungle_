@@ -1,23 +1,70 @@
-// DialogueData.cs
-
 using UnityEngine;
 
-// ## 수정: 새로운 대화를 시작하는 옵션 추가 ##
+// 상점 열기, 새 대화 시작 등의 '큰 흐름'을 결정
 public enum ChoiceActionType
 {
-    DoNothing,      // 아무것도 안 함
+    DoNothing,      // 아무것도 안 함 (결과만 실행)
     OpenShop,       // 상점 열기
     OpenUpgradeUI,  // 대장간 UI 열기
     StartNewDialogue // 다른 대화 시작
 }
 
+// 퀘스트 상태, 아이템 소지 여부 등의 '조건'을 명시
+public enum ConditionType
+{
+    HasQuest,
+    HasItem,
+    HasMoney
+}
+
+// 퀘스트 시작/완료, 아이템 회수 등의 '결과'를 명시
 public enum ChoiceResultType
 {
-    DoNothing,      // 아무것도 안 함
-    StartQuest,     // 퀘스트 시작 (NotStarted -> InProgress)
-    CompleteQuest,  // 퀘스트 완료 (InProgress -> Completed)
-    GiveItem,       // (미구현) 아이템 주기
-    TakeItem        // (미구현) 아이템 뺏기
+    DoNothing,
+    StartQuest,
+    CompleteQuest,
+    TakeItem,
+    TakeMoney
+}
+
+// ## 여기가 중요! ##
+// 아래 클래스들에 DialogueManager가 필요로 하는 모든 변수가 포함되어 있습니다.
+[System.Serializable]
+public class DialogueChoice
+{
+    public string choiceText;
+
+    // ## 오류 수정: 이 줄들이 없으면 에러가 발생합니다 ##
+    public ChoiceActionType actionType;
+    [Tooltip("다른 대화를 시작할 경우에만 이 필드를 채워주세요.")]
+    public DialogueData nextDialogue;
+    //#####################################################
+
+    [Header("선택지 표시 조건")]
+    public ChoiceCondition[] conditions;
+
+    [Tooltip("체크하면, 위 조건들을 만족하지 못했을 때 선택지를 숨기는 대신 비활성화 상태로 보여줍니다.")]
+    public bool showAsDisabledIfNotMet = false;
+
+    [Header("선택지 결과")]
+    public ChoiceResult[] results;
+}
+
+[System.Serializable]
+public class ChoiceCondition
+{
+    public ConditionType conditionType;
+
+    [Header("Quest 조건")]
+    public QuestData requiredQuest;
+    public QuestStatus requiredStatus;
+
+    [Header("Item 조건")]
+    public ItemData requiredItem;
+    public int requiredItemCount = 1;
+
+    [Header("Money 조건")]
+    public int requiredMoney;
 }
 
 [System.Serializable]
@@ -26,48 +73,14 @@ public class ChoiceResult
     public ChoiceResultType resultType;
 
     [Header("Quest 관련")]
-    public QuestData targetQuest; // 상태를 변경할 퀘스트
+    public QuestData targetQuest;
+
+    [Header("Item/Money 관련")]
+    public ItemData itemToTake;
+    public int itemCountToTake = 1;
+    public int moneyToTake;
 }
 
-
-
-public enum ConditionType
-{
-    HasQuest   // 특정 퀘스트의 상태를 조건으로
-}
-
-// ## 추가 2: 선택지 표시 조건을 정의하는 클래스 ##
-[System.Serializable]
-public class ChoiceCondition
-{
-    public ConditionType conditionType;
-
-    [Header("Quest 조건")]
-    public QuestData requiredQuest;    // 확인할 퀘스트
-    public QuestStatus requiredStatus; // 만족해야 하는 퀘스트 상태
-}
-
-
-[System.Serializable]
-public class DialogueChoice
-{
-    public string choiceText;
-    public ChoiceActionType actionType;
-
-    // ## 추가: actionType이 StartNewDialogue일 경우 연결할 DialogueData ##
-    [Tooltip("다른 대화를 시작할 경우에만 이 필드를 채워주세요.")]
-    public DialogueData nextDialogue;
-
-    // ## 핵심 추가: 이 선택지가 보이려면 만족해야 하는 조건들 목록 ##
-    [Header("선택지 표시 조건")]
-    public ChoiceCondition[] conditions;
-
-    // ## 핵심 추가: 이 선택지를 골랐을 때 발생하는 결과들 ##
-    [Header("선택지 결과")]
-    public ChoiceResult[] results;
-
-
-}
 
 [CreateAssetMenu(fileName = "New Dialogue", menuName = "NPC/Dialogue Data")]
 public class DialogueData : ScriptableObject

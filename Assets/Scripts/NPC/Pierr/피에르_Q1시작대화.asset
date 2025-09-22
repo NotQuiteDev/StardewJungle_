@@ -26,7 +26,7 @@ MonoBehaviour:
     - resultType: 1
       targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
   - choiceText: Not my problem.
-    actionType: 0
+    actionType: 3
     nextDialogue: {fileID: 11400000, guid: 8d5c7e8dc4d4e6740a23bf41415d04e7, type: 2}
     conditions: []
     results: []
