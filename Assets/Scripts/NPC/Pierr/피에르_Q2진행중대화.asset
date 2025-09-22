@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
-  m_Name: "\uD53C\uC5D0\uB974_Q1\uC9C4\uD589\uC911\uB300\uD654"
+  m_Name: "\uD53C\uC5D0\uB974_Q2\uC9C4\uD589\uC911\uB300\uD654"
   m_EditorClassIdentifier: 
   npcName: Pierr
   npcPortrait: {fileID: 21300000, guid: e8eaeefc7d26d534fa03dc54939dcd6c, type: 3}
   dialogueLines:
-  - Oh! The 5 Red Crops I asked for! Did you bring it?
+  - Oh! The 5 Yellow Crops I asked for! Did you bring it?
   choices:
   - choiceText: Yes, here it is.
     actionType: 3
-    nextDialogue: {fileID: 11400000, guid: e2d299b609039d94990badc9fda5848f, type: 2}
+    nextDialogue: {fileID: 11400000, guid: f50b26d583134a2488b4c97cf4683d94, type: 2}
     conditions:
     - conditionType: 1
       requiredQuest: {fileID: 0}
       requiredStatus: 0
       requiredItems:
-      - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
-      - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
-      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      - {fileID: 11400000, guid: 35f266cd5e1db2b4cb09db5d804e9dac, type: 2}
+      - {fileID: 11400000, guid: 1c5a5e3e822d51e45ae64dbb8e7eecd7, type: 2}
+      - {fileID: 11400000, guid: 259286b6b5749d946930a1fbe5b4241e, type: 2}
       requiredItemCount: 5
       itemLogic: 2
       requiredMoney: 0
@@ -36,15 +36,15 @@ MonoBehaviour:
     - resultType: 3
       targetQuest: {fileID: 11400000, guid: 4d3f92b6a7f010f429c84191a3974f0d, type: 2}
       itemsToTake:
-      - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
-      - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
-      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      - {fileID: 11400000, guid: 35f266cd5e1db2b4cb09db5d804e9dac, type: 2}
+      - {fileID: 11400000, guid: 1c5a5e3e822d51e45ae64dbb8e7eecd7, type: 2}
+      - {fileID: 11400000, guid: 259286b6b5749d946930a1fbe5b4241e, type: 2}
       itemCountToTake: 5
       itemTakeLogic: 2
       moneyToTake: 0
       moneyToGive: 0
     - resultType: 2
-      targetQuest: {fileID: 11400000, guid: 4d3f92b6a7f010f429c84191a3974f0d, type: 2}
+      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
       itemsToTake:
       - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
       - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
@@ -54,7 +54,7 @@ MonoBehaviour:
       moneyToTake: 0
       moneyToGive: 0
     - resultType: 5
-      targetQuest: {fileID: 11400000, guid: 4d3f92b6a7f010f429c84191a3974f0d, type: 2}
+      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
       itemsToTake:
       - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
       - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
@@ -62,7 +62,7 @@ MonoBehaviour:
       itemCountToTake: 5
       itemTakeLogic: 2
       moneyToTake: 0
-      moneyToGive: 500
+      moneyToGive: 1000
   - choiceText: "Sorry, I don\u2019t have it yet."
     actionType: 0
     nextDialogue: {fileID: 0}

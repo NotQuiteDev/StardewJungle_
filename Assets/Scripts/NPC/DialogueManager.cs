@@ -346,6 +346,13 @@ private void ExecuteChoiceResult(ChoiceResult result)
         case ChoiceResultType.TakeMoney:
             MoneyManager.Instance.SpendMoney(result.moneyToTake);
             break;
+
+        // ## 핵심 추가: GiveMoney 케이스 ##
+        case ChoiceResultType.GiveMoney:
+            // MoneyManager에 돈을 추가하는 함수를 호출합니다. (함수 이름은 다를 수 있습니다)
+            MoneyManager.Instance.AddMoney(result.moneyToGive); 
+            Debug.Log($"{result.moneyToGive:N0} 골드를 획득했습니다.");
+            break;
         
         case ChoiceResultType.DoNothing:
             // 아무것도 하지 않음

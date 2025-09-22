@@ -24,7 +24,8 @@ public enum ChoiceResultType
     StartQuest,
     CompleteQuest,
     TakeItem,
-    TakeMoney
+    TakeMoney,
+    GiveMoney // ## 추가 ##
 }
 
 // ## 추가: 조건 논리를 정의하는 Enum (AND/OR) ##
@@ -86,13 +87,12 @@ public class ChoiceResult
     [Header("Quest 관련")]
     public QuestData targetQuest;
     
-    // ## 수정: 단일 아이템에서 아이템 '배열'로 변경 ##
     [Header("Item/Money 관련")]
-    public ItemData[] itemsToTake; // 여러 아이템을 지정할 수 있도록 배열로 변경
+    public ItemData[] itemsToTake;
     public int itemCountToTake = 1;
-    [Tooltip("AND: 목록의 모든 아이템을 제거\nOR: 목록 중 플레이어가 가진 첫 번째 아이템만 제거")]
-    public ConditionLogic itemTakeLogic = ConditionLogic.AND; // 제거 방식 선택
+    public ConditionLogic itemTakeLogic = ConditionLogic.AND;
     public int moneyToTake;
+    public int moneyToGive; // ## 추가: 지급할 돈의 액수 ##
 }
 
 
