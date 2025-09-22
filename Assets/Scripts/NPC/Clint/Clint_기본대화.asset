@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: "Clint_\uAE30\uBCF8\uB300\uD654"
+  m_EditorClassIdentifier: 
+  npcName: Clint
+  npcPortrait: {fileID: 21300000, guid: 48ccce4791f925540b01a4484f6f9d28, type: 3}
+  dialogueLines:
+  - "Tch\u2026 you again. Don\u2019t break your gear so often if you don\u2019t want
+    to see me this much."
+  choices:
+  - choiceText: Upgrade
+    actionType: 2
+    nextDialogue: {fileID: 0}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Not Because I Care...
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 838f0a82fefcd33419aefb253fa13dbd, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: ffb66eee1ce5e7e4494850b4e474077b, type: 2}
+      requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 1
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Do Nothing
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: d0b96eeead314c94b9329e026bf2755d, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "About that request from before\u2026"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: da0e93dd767c50a4283fa61b05a1f68d, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: ffb66eee1ce5e7e4494850b4e474077b, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "About that request from before\u2026"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 5a07d54829a4b3c41993ed090d0e117f, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: fed108f2a35d2f74fa0655758e9e1cb6, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: For a Brighter Night
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 9e4b1564d34795445ac670c63dd9007b, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: ffb66eee1ce5e7e4494850b4e474077b, type: 2}
+      requiredStatus: 2
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: fed108f2a35d2f74fa0655758e9e1cb6, type: 2}
+      requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []

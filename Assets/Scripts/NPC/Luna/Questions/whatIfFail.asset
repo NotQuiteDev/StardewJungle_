@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: whatIfFail
+  m_EditorClassIdentifier: 
+  npcName: Luna
+  npcPortrait: {fileID: 21300000, guid: c7532d02a078fd94d92fd3e7a4f5cede, type: 3}
+  dialogueLines:
+  - Then the altar will remain silent, and the land will weaken. The festival will
+    turn hollow, a feast without a prayer. That is why your help matters.
+  choices:
+  - choiceText: Why all seven colors?
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: fe091ee036d3fec45aa701ace778111c, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "What will happen when it\u2019s complete?"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 18a2abc16f62bf24ab09af37114609ea, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Sorry, not now.
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: db03420f6e7ab3946a1a5b994d2994d1, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
