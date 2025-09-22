@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
-  m_Name: "\uD53C\uC5D0\uB974_\uAE30\uBCF8\uB300\uD654"
+  m_Name: Clint Need Help
   m_EditorClassIdentifier: 
-  npcName: Pierr
-  npcPortrait: {fileID: 21300000, guid: e8eaeefc7d26d534fa03dc54939dcd6c, type: 3}
+  npcName: Clint
+  npcPortrait: {fileID: 21300000, guid: ef7a1d4130c0d2b4f8ea737b96a40e2f, type: 3}
   dialogueLines:
-  - Heeey! Welcome to my little shop of treasures! Take a look around, okay?
+  - Ah, perfect timing!
+  - " I\u2019ve been running low on Copper Ingot\u2026 "
+  - "Without it, I can\u2019t finish reforging the townsfolk\u2019s tools. Could
+    you fetch me some?"
   choices:
-  - choiceText: look shop
-    actionType: 1
-    nextDialogue: {fileID: 0}
-  - choiceText: Do Nothing
+  - choiceText: Of course, leave it to me!
     actionType: 0
     nextDialogue: {fileID: 0}
-  - choiceText: Where is it?
-    actionType: 3
+  - choiceText: "I\u2019m sorry, but I can\u2019t right now."
+    actionType: 0
     nextDialogue: {fileID: 0}

@@ -13,10 +13,16 @@ MonoBehaviour:
   m_Name: Clint
   m_EditorClassIdentifier: 
   npcName: Clint
-  npcPortrait: {fileID: 21300000, guid: 3b480095c73dbd44cbb3aada88bd5c7d, type: 3}
-  dialogueLines: []
+  npcPortrait: {fileID: 21300000, guid: b73ca8f111ade0640b480ac6691f1760, type: 3}
+  dialogueLines:
+  - Welcome! Looking for a hammer or a smile?
   choices:
   - choiceText: Upgrade
     actionType: 2
+    nextDialogue: {fileID: 0}
   - choiceText: Do nothing
     actionType: 0
+    nextDialogue: {fileID: 0}
+  - choiceText: Do you need any help?
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 8048cb981c2a5cb4d890452d62ec3fee, type: 2}

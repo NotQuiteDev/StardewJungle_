@@ -1,20 +1,25 @@
-using UnityEngine;
-using UnityEngine.Events;
+// DialogueData.cs
 
-// ## 추가: 선택지가 어떤 종류의 행동을 하는지 정의하는 enum ##
+using UnityEngine;
+
+// ## 수정: 새로운 대화를 시작하는 옵션 추가 ##
 public enum ChoiceActionType
 {
     DoNothing,      // 아무것도 안 함
     OpenShop,       // 상점 열기
-    OpenUpgradeUI   // 대장간 업그레이드 UI 열기
-    // 여기에 나중에 StartQuest, GiveItem 등을 추가할 수 있습니다.
+    OpenUpgradeUI,  // 대장간 UI 열기
+    StartNewDialogue // 다른 대화 시작
 }
 
 [System.Serializable]
 public class DialogueChoice
 {
     public string choiceText;
-    public ChoiceActionType actionType; // UnityEvent 대신 이 enum을 사용합니다.
+    public ChoiceActionType actionType;
+
+    // ## 추가: actionType이 StartNewDialogue일 경우 연결할 DialogueData ##
+    [Tooltip("다른 대화를 시작할 경우에만 이 필드를 채워주세요.")]
+    public DialogueData nextDialogue;
 }
 
 [CreateAssetMenu(fileName = "New Dialogue", menuName = "NPC/Dialogue Data")]
