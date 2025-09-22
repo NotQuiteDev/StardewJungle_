@@ -64,8 +64,8 @@ MonoBehaviour:
       moneyToTake: 0
       moneyToGive: 500
   - choiceText: "Sorry, I don\u2019t have it yet."
-    actionType: 0
-    nextDialogue: {fileID: 0}
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 8d5c7e8dc4d4e6740a23bf41415d04e7, type: 2}
     conditions: []
     showAsDisabledIfNotMet: 0
     results: []

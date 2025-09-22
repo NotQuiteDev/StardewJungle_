@@ -34,7 +34,7 @@ MonoBehaviour:
     showAsDisabledIfNotMet: 1
     results:
     - resultType: 3
-      targetQuest: {fileID: 11400000, guid: 4d3f92b6a7f010f429c84191a3974f0d, type: 2}
+      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
       itemsToTake:
       - {fileID: 11400000, guid: 35f266cd5e1db2b4cb09db5d804e9dac, type: 2}
       - {fileID: 11400000, guid: 1c5a5e3e822d51e45ae64dbb8e7eecd7, type: 2}
@@ -64,8 +64,8 @@ MonoBehaviour:
       moneyToTake: 0
       moneyToGive: 1000
   - choiceText: "Sorry, I don\u2019t have it yet."
-    actionType: 0
-    nextDialogue: {fileID: 0}
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 8d5c7e8dc4d4e6740a23bf41415d04e7, type: 2}
     conditions: []
     showAsDisabledIfNotMet: 0
     results: []

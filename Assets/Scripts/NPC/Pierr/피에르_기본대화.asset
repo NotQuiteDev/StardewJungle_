@@ -57,7 +57,7 @@ MonoBehaviour:
     results: []
   - choiceText: "About that request from before\u2026"
     actionType: 3
-    nextDialogue: {fileID: 11400000, guid: b6ac3f92483a553498cb0f8fe2d3a8d6, type: 2}
+    nextDialogue: {fileID: 11400000, guid: b845eeea5aec27748a4dc43267a9804c, type: 2}
     conditions:
     - conditionType: 0
       requiredQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
@@ -75,6 +75,13 @@ MonoBehaviour:
     - conditionType: 0
       requiredQuest: {fileID: 11400000, guid: 4d3f92b6a7f010f429c84191a3974f0d, type: 2}
       requiredStatus: 2
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
+      requiredStatus: 0
       requiredItems: []
       requiredItemCount: 0
       itemLogic: 0
