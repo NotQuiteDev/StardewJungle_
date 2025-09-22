@@ -120,23 +120,47 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowChoices()
     {
-        // ## 수정: 대화 텍스트를 비활성화하지 않고, 선택지만 활성화합니다. ##
-        // dialogueText.gameObject.SetActive(false); // 이 줄을 주석 처리하거나 삭제
         choicesPanel.gameObject.SetActive(true);
         foreach (Transform child in choicesPanel) { Destroy(child.gameObject); }
 
+        // ## 핵심 수정: 버튼을 만들기 전에 조건 확인 로직을 추가 ##
         foreach (var choice in currentDialogueData.choices)
         {
-            GameObject choiceButtonGO = Instantiate(choiceButtonPrefab, choicesPanel);
-            var buttonText = choiceButtonGO.GetComponentInChildren<TextMeshProUGUI>();
-            var button = choiceButtonGO.GetComponent<Button>();
+            // 이 선택지의 모든 조건이 충족되었는지 확인합니다.
+            if (AreConditionsMet(choice)) 
+            {
+                // 조건이 충족된 선택지만 버튼으로 만듭니다.
+                GameObject choiceButtonGO = Instantiate(choiceButtonPrefab, choicesPanel);
+                var buttonText = choiceButtonGO.GetComponentInChildren<TextMeshProUGUI>();
+                var button = choiceButtonGO.GetComponent<Button>();
 
-            buttonText.text = choice.choiceText;
-            button.onClick.AddListener(() => {
-                PerformChoiceAction(choice); // choice 객체 전체를 넘겨줍니다.
-            });
+                buttonText.text = choice.choiceText;
+                button.onClick.AddListener(() => {
+                    PerformChoiceAction(choice);
+                });
+            }
         }
     }
+
+    // ## 핵심 추가: 선택지의 조건들을 확인하는 새로운 함수 ##
+// ## 핵심 수정: Quest 조건만 확인하도록 함수 내부를 간소화합니다. ##
+private bool AreConditionsMet(DialogueChoice choice)
+{
+    foreach (var condition in choice.conditions)
+    {
+        // 이제 조건 타입이 HasQuest 하나뿐이므로 switch 문이 필요 없습니다.
+        QuestStatus currentStatus = QuestManager.Instance.GetQuestStatus(condition.requiredQuest);
+
+        // 현재 상태가 조건과 일치하지 않으면, 즉시 false를 반환합니다.
+        if (currentStatus != condition.requiredStatus)
+        {
+            return false;
+        }
+    }
+
+    // 모든 퀘스트 조건을 통과했으면 true를 반환합니다.
+    return true;
+}
 
     // ## 수정: 파라미터로 ChoiceActionType 대신 DialogueChoice 전체를 받습니다. ##
     private void PerformChoiceAction(DialogueChoice choice)

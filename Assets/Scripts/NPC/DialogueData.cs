@@ -13,9 +13,7 @@ public enum ChoiceActionType
 
 public enum ConditionType
 {
-    HasQuest,   // 특정 퀘스트의 상태를 조건으로
-    HasItem,    // 특정 아이템 소유 여부를 조건으로
-    HasMoney    // 특정 금액 이상 소유 여부를 조건으로
+    HasQuest   // 특정 퀘스트의 상태를 조건으로
 }
 
 // ## 추가 2: 선택지 표시 조건을 정의하는 클래스 ##
@@ -27,14 +25,6 @@ public class ChoiceCondition
     [Header("Quest 조건")]
     public QuestData requiredQuest;    // 확인할 퀘스트
     public QuestStatus requiredStatus; // 만족해야 하는 퀘스트 상태
-
-    [Header("Item 조건")]
-    public ItemData requiredItem;      // 필요한 아이템
-    public int requiredItemCount = 1;  // 필요한 아이템 개수
-
-    [Header("Money 조건")]
-    public int requiredMoney;          // 필요한 돈
-
     // ## 추가 3: 조건이 충족되지 않았을 때 선택지를 숨길지 여부 ##
     [Tooltip("체크하면 조건 불충족 시 선택지가 아예 보이지 않습니다. 체크 해제하면 비활성화된 채로 보입니다.")]
     public bool hideIfConditionNotMet = true;
