@@ -14774,10 +14774,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionPrompt: E/North to Open Shop
-  dialogueData: {fileID: 0}
+  dialogueData: {fileID: 11400000, guid: c0019a8be95efd947907f46343fbe895, type: 2}
   shopItemList:
-  - item: {fileID: 11400000, guid: 6f381473da2c8fe4b81a53a707df313f, type: 2}
-    price: 30
   - item: {fileID: 11400000, guid: b9cdf1217780540438da8cc09450167b, type: 2}
     price: 100
 --- !u!136 &2134336469

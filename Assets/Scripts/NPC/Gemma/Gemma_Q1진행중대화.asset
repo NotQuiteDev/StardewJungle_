@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: "Gemma_Q1\uC9C4\uD589\uC911\uB300\uD654"
+  m_EditorClassIdentifier: 
+  npcName: Gemma
+  npcPortrait: {fileID: 21300000, guid: 58fe44fb96aa5c24fbc5cea78ee6fa06, type: 3}
+  dialogueLines:
+  - Oh! You mean the 100 Stones for my monument, right? Did you bring them, partner?
+  choices:
+  - choiceText: Yes, here it is.
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 497951f19a11d8047970b9f539d47102, type: 2}
+    conditions:
+    - conditionType: 1
+      requiredQuest: {fileID: 0}
+      requiredStatus: 0
+      requiredItems:
+      - {fileID: 11400000, guid: 6f381473da2c8fe4b81a53a707df313f, type: 2}
+      requiredItemCount: 100
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 1
+    results:
+    - resultType: 3
+      targetQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      itemsToTake:
+      - {fileID: 11400000, guid: 6f381473da2c8fe4b81a53a707df313f, type: 2}
+      itemCountToTake: 100
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 0
+    - resultType: 2
+      targetQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      itemsToTake:
+      - {fileID: 11400000, guid: 6f381473da2c8fe4b81a53a707df313f, type: 2}
+      itemCountToTake: 100
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 0
+    - resultType: 5
+      targetQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      itemsToTake:
+      - {fileID: 11400000, guid: 6f381473da2c8fe4b81a53a707df313f, type: 2}
+      itemCountToTake: 100
+      itemTakeLogic: 0
+      moneyToTake: 0
+      moneyToGive: 700
+  - choiceText: "Sorry, I don\u2019t have it yet."
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 4ae2c5747613e51409892cd6dc92260b, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []

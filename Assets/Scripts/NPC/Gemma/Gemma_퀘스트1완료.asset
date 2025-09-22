@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: "Gemma_\uD018\uC2A4\uD2B81\uC644\uB8CC"
+  m_EditorClassIdentifier: 
+  npcName: Gemma
+  npcPortrait: {fileID: 21300000, guid: 58fe44fb96aa5c24fbc5cea78ee6fa06, type: 3}
+  dialogueLines:
+  - 'Heh, you really lugged all 100 Stones here? Amazing! '
+  - "With these, my monument will rise tall! Here, take $700\u2014don\u2019t drop
+    it, it\u2019s heavy like the Stones!"
+  - "Thanks a ton. With this, my work can shine\u2026 well, not as bright as you,
+    but close!"
+  choices: []

@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68eb27a128ee3df4ea9a6b1f2393fac0, type: 3}
+  m_Name: "Gemma_\uAE30\uBCF8\uB300\uD654"
+  m_EditorClassIdentifier: 
+  npcName: Gemma
+  npcPortrait: {fileID: 21300000, guid: 58fe44fb96aa5c24fbc5cea78ee6fa06, type: 3}
+  dialogueLines:
+  - "Yo, partner! Got dirt on your boots again? Heh, that just means you\u2019re
+    working as hard as I am!"
+  choices:
+  - choiceText: Shop
+    actionType: 1
+    nextDialogue: {fileID: 0}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Monument of Stone
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: ea83db82b8784df4995b91253d9dc4df, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 1
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Do Nothing
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 4f16e74324eda2b4092a1891dab797cf, type: 2}
+    conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "About that request from before\u2026"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: f9f4dfa4ca7696048a8114d421268cbb, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "About that request from before\u2026"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: 2d9f8d2d5ca8ec645b4683e5e11eabc2, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: e1153a5046760894681cc87d5756d0ce, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: Golden Earth Spirit
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: e28509821b9819649ba67a2f30b3d8f4, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 730511f79ddbaa74e8435d128688a205, type: 2}
+      requiredStatus: 2
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: e1153a5046760894681cc87d5756d0ce, type: 2}
+      requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
+    results: []
