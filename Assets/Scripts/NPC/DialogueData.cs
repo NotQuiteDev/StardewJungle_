@@ -6,7 +6,8 @@ public enum ChoiceActionType
     DoNothing,      // 아무것도 안 함 (결과만 실행)
     OpenShop,       // 상점 열기
     OpenUpgradeUI,  // 대장간 UI 열기
-    StartNewDialogue // 다른 대화 시작
+    StartNewDialogue, // 다른 대화 시작
+    ChangeScene // ## 추가 ##
 }
 
 // 퀘스트 상태, 아이템 소지 여부 등의 '조건'을 명시
@@ -48,6 +49,11 @@ public class DialogueChoice
     [Tooltip("다른 대화를 시작할 경우에만 이 필드를 채워주세요.")]
     public DialogueData nextDialogue;
     //#####################################################
+
+    // ## 3. 씬 변경 시 사용할 변수 추가 ##
+    [Header("Change Scene 설정")]
+    [Tooltip("actionType이 ChangeScene일 경우, 불러올 씬의 이름을 정확히 입력하세요.")]
+    public string sceneNameToLoad;
 
     [Header("선택지 표시 조건")]
     public ChoiceCondition[] conditions;

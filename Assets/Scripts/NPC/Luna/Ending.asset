@@ -25,8 +25,9 @@ MonoBehaviour:
     Are you prepared to see it through?'
   choices:
   - choiceText: Awaken the Spirit (This leads to the ending)
-    actionType: 0
+    actionType: 4
     nextDialogue: {fileID: 0}
+    sceneNameToLoad: Ending
     conditions: []
     showAsDisabledIfNotMet: 0
     results:
@@ -40,6 +41,7 @@ MonoBehaviour:
   - choiceText: Not yet. I need more time.
     actionType: 3
     nextDialogue: {fileID: 11400000, guid: db03420f6e7ab3946a1a5b994d2994d1, type: 2}
+    sceneNameToLoad: 
     conditions: []
     showAsDisabledIfNotMet: 0
     results: []

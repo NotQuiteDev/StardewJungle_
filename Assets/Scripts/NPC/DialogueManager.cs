@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -238,6 +239,21 @@ private bool AreConditionsMet(DialogueChoice choice)
     // ## 수정: 파라미터로 ChoiceActionType 대신 DialogueChoice 전체를 받습니다. ##
     private void PerformChoiceAction(DialogueChoice choice)
     {
+        // ▼▼▼ 이 부분이 씬을 직접 바꾸도록 시키는 코드입니다 ▼▼▼
+        if (choice.actionType == ChoiceActionType.ChangeScene)
+        {
+            if (!string.IsNullOrEmpty(choice.sceneNameToLoad))
+            {
+                // 유니티의 내장 SceneManager가 직접 씬을 불러옵니다.
+                SceneManager.LoadScene(choice.sceneNameToLoad);
+            }
+            else
+            {
+                Debug.LogError("이동할 씬 이름이 지정되지 않았습니다!");
+            }
+            return; // 씬을 바꾸면 다른 행동은 할 필요가 없으므로 여기서 종료
+        }
+
         // ## 핵심 추가: 선택지에 정의된 모든 '결과(Result)'를 순서대로 실행 ##
         foreach (var result in choice.results)
         {
