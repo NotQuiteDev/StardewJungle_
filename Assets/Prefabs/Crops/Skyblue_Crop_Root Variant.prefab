@@ -22,7 +22,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
       propertyPath: greenZoneWidth01
-      value: 0.1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 2472277551934913480, guid: 87f168cbdcbb55743ba5e96fa7d5ee39, type: 3}
       propertyPath: waterLossPerSecond
