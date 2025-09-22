@@ -25,9 +25,6 @@ public class ChoiceCondition
     [Header("Quest 조건")]
     public QuestData requiredQuest;    // 확인할 퀘스트
     public QuestStatus requiredStatus; // 만족해야 하는 퀘스트 상태
-    // ## 추가 3: 조건이 충족되지 않았을 때 선택지를 숨길지 여부 ##
-    [Tooltip("체크하면 조건 불충족 시 선택지가 아예 보이지 않습니다. 체크 해제하면 비활성화된 채로 보입니다.")]
-    public bool hideIfConditionNotMet = true;
 }
 
 
