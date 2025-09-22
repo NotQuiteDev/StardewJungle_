@@ -157,23 +157,68 @@ public class DialogueManager : MonoBehaviour
 
     // ## 핵심 추가: 선택지의 조건들을 확인하는 새로운 함수 ##
     // ## 핵심 수정: Quest 조건만 확인하도록 함수 내부를 간소화합니다. ##
-    private bool AreConditionsMet(DialogueChoice choice)
+private bool AreConditionsMet(DialogueChoice choice)
+{
+    foreach (var condition in choice.conditions)
     {
-        foreach (var condition in choice.conditions)
+        bool conditionMet = false;
+        switch (condition.conditionType)
         {
-            // 이제 조건 타입이 HasQuest 하나뿐이므로 switch 문이 필요 없습니다.
-            QuestStatus currentStatus = QuestManager.Instance.GetQuestStatus(condition.requiredQuest);
+            case ConditionType.HasQuest:
+                QuestStatus currentStatus = QuestManager.Instance.GetQuestStatus(condition.requiredQuest);
+                if (currentStatus == condition.requiredStatus)
+                {
+                    conditionMet = true;
+                }
+                break;
+            
+            case ConditionType.HasItem:
+                if (condition.itemLogic == ConditionLogic.AND)
+                {
+                    // AND 논리: 모든 아이템을 다 가지고 있는지 확인
+                    bool allItemsFound = true;
+                    foreach (var item in condition.requiredItems)
+                    {
+                        if (InventoryManager.Instance.GetItemCount(item) < condition.requiredItemCount)
+                        {
+                            allItemsFound = false;
+                            break; // 하나라도 부족하면 즉시 중단
+                        }
+                    }
+                    if (allItemsFound) conditionMet = true;
+                }
+                else // OR 논리
+                {
+                    // OR 논리: 아이템 중 하나라도 가지고 있는지 확인
+                    foreach (var item in condition.requiredItems)
+                    {
+                        if (InventoryManager.Instance.GetItemCount(item) >= condition.requiredItemCount)
+                        {
+                            conditionMet = true;
+                            break; // 하나라도 찾으면 즉시 통과
+                        }
+                    }
+                }
+                break;
 
-            // 현재 상태가 조건과 일치하지 않으면, 즉시 false를 반환합니다.
-            if (currentStatus != condition.requiredStatus)
-            {
-                return false;
-            }
+            case ConditionType.HasMoney:
+                if (MoneyManager.Instance.CurrentMoney >= condition.requiredMoney)
+                {
+                    conditionMet = true;
+                }
+                break;
         }
 
-        // 모든 퀘스트 조건을 통과했으면 true를 반환합니다.
-        return true;
+        // 여러 조건 중 단 하나라도 만족하지 못하면, 이 선택지는 보이면 안 되므로 즉시 false를 반환합니다.
+        if (!conditionMet)
+        {
+            return false;
+        }
     }
+
+    // 모든 조건을 무사히 통과했다면, 선택지를 보여줘도 좋다는 의미로 true를 반환합니다.
+    return true;
+}
 
     // ## 수정: 파라미터로 ChoiceActionType 대신 DialogueChoice 전체를 받습니다. ##
     private void PerformChoiceAction(DialogueChoice choice)
@@ -222,26 +267,51 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    // ## 핵심 추가: ChoiceResult를 실제로 실행하는 새로운 함수 ##
-    private void ExecuteChoiceResult(ChoiceResult result)
+private void ExecuteChoiceResult(ChoiceResult result)
+{
+    switch (result.resultType)
     {
-        switch (result.resultType)
-        {
-            case ChoiceResultType.StartQuest:
-                // QuestManager에게 퀘스트 상태를 InProgress로 바꿔달라고 요청
-                QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.InProgress);
-                break;
+        case ChoiceResultType.StartQuest:
+            QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.InProgress);
+            break;
 
-            case ChoiceResultType.CompleteQuest:
-                // QuestManager에게 퀘스트 상태를 Completed로 바꿔달라고 요청
-                QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.Completed);
-                break;
-            
-            case ChoiceResultType.DoNothing:
-                // 아무것도 하지 않음
-                break;
-        }
+        case ChoiceResultType.CompleteQuest:
+            QuestManager.Instance.UpdateQuestStatus(result.targetQuest, QuestStatus.Completed);
+            break;
+        
+        case ChoiceResultType.TakeItem:
+            if (result.itemTakeLogic == ConditionLogic.AND)
+            {
+                // AND 논리: 지정된 모든 아이템을 제거
+                foreach (var item in result.itemsToTake)
+                {
+                    InventoryManager.Instance.RemoveItem(item, result.itemCountToTake);
+                }
+            }
+            else // OR 논리
+            {
+                // OR 논리: 플레이어가 가진 첫 번째 아이템을 찾아 제거
+                foreach (var item in result.itemsToTake)
+                {
+                    if (InventoryManager.Instance.GetItemCount(item) >= result.itemCountToTake)
+                    {
+                        InventoryManager.Instance.RemoveItem(item, result.itemCountToTake);
+                        Debug.Log($"{item.itemName} {result.itemCountToTake}개를 전달했습니다. (OR 조건)");
+                        break; // 하나만 제거하고 중단
+                    }
+                }
+            }
+            break;
+
+        case ChoiceResultType.TakeMoney:
+            MoneyManager.Instance.SpendMoney(result.moneyToTake);
+            break;
+        
+        case ChoiceResultType.DoNothing:
+            // 아무것도 하지 않음
+            break;
     }
+}
 
     private void EndDialogue()
     {

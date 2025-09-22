@@ -15,4 +15,4 @@ MonoBehaviour:
   itemName: Purple Crop(Gold)
   itemIcon: {fileID: 21300000, guid: f36027146d4b393489261a92805f617c, type: 3}
   itemPrefab: {fileID: 966922665714506520, guid: 14b5ee57a2abfaf47b5f30ee7c66e06d, type: 3}
-  sellPrice: 20000
+  sellPrice: 1200

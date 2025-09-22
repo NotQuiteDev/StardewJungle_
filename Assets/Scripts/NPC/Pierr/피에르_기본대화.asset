@@ -21,6 +21,7 @@ MonoBehaviour:
     actionType: 1
     nextDialogue: {fileID: 0}
     conditions: []
+    showAsDisabledIfNotMet: 0
     results: []
   - choiceText: Do you need any help?
     actionType: 3
@@ -29,11 +30,34 @@ MonoBehaviour:
     - conditionType: 0
       requiredQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
       requiredStatus: 0
+      requiredItems: []
+      requiredItemCount: 1
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
     results:
     - resultType: 0
       targetQuest: {fileID: 0}
+      itemsToTake: []
+      itemCountToTake: 1
+      itemTakeLogic: 0
+      moneyToTake: 0
   - choiceText: Do Nothing
     actionType: 3
     nextDialogue: {fileID: 11400000, guid: ecc211754d360f640badc4cbd409d257, type: 2}
     conditions: []
+    showAsDisabledIfNotMet: 0
+    results: []
+  - choiceText: "About that request from before\u2026"
+    actionType: 3
+    nextDialogue: {fileID: 11400000, guid: b6ac3f92483a553498cb0f8fe2d3a8d6, type: 2}
+    conditions:
+    - conditionType: 0
+      requiredQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
+      requiredStatus: 1
+      requiredItems: []
+      requiredItemCount: 0
+      itemLogic: 0
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 0
     results: []

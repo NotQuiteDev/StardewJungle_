@@ -27,6 +27,13 @@ public enum ChoiceResultType
     TakeMoney
 }
 
+// ## 추가: 조건 논리를 정의하는 Enum (AND/OR) ##
+public enum ConditionLogic
+{
+    AND, // 목록에 있는 모든 조건을 만족해야 함
+    OR   // 목록에 있는 조건 중 하나라도 만족하면 됨
+}
+
 // ## 여기가 중요! ##
 // 아래 클래스들에 DialogueManager가 필요로 하는 모든 변수가 포함되어 있습니다.
 [System.Serializable]
@@ -59,9 +66,12 @@ public class ChoiceCondition
     public QuestData requiredQuest;
     public QuestStatus requiredStatus;
 
+    // ## 수정: 단일 아이템에서 아이템 '배열'로 변경 ##
     [Header("Item 조건")]
-    public ItemData requiredItem;
+    public ItemData[] requiredItems; // 여러 아이템을 넣을 수 있도록 배열로 변경
     public int requiredItemCount = 1;
+    [Tooltip("AND: 목록의 모든 아이템이 필요\nOR: 목록의 아이템 중 하나만 필요")]
+    public ConditionLogic itemLogic = ConditionLogic.AND; // AND / OR 논리 선택
 
     [Header("Money 조건")]
     public int requiredMoney;
@@ -74,10 +84,13 @@ public class ChoiceResult
 
     [Header("Quest 관련")]
     public QuestData targetQuest;
-
+    
+    // ## 수정: 단일 아이템에서 아이템 '배열'로 변경 ##
     [Header("Item/Money 관련")]
-    public ItemData itemToTake;
+    public ItemData[] itemsToTake; // 여러 아이템을 지정할 수 있도록 배열로 변경
     public int itemCountToTake = 1;
+    [Tooltip("AND: 목록의 모든 아이템을 제거\nOR: 목록 중 플레이어가 가진 첫 번째 아이템만 제거")]
+    public ConditionLogic itemTakeLogic = ConditionLogic.AND; // 제거 방식 선택
     public int moneyToTake;
 }
 

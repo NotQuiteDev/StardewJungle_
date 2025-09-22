@@ -15,18 +15,36 @@ MonoBehaviour:
   npcName: Pierr
   npcPortrait: {fileID: 21300000, guid: e8eaeefc7d26d534fa03dc54939dcd6c, type: 3}
   dialogueLines:
-  - "Um\u2026 Actually, could you bring me just one Red Crop? Any grade is fine\u2026
-    I just need one for a special recipe."
+  - Oh! The Red Crop I asked for! Did you bring it?
   choices:
-  - choiceText: "Sure, I\u2019ll get it for you."
+  - choiceText: Yes, here it is.
+    actionType: 0
+    nextDialogue: {fileID: 0}
+    conditions:
+    - conditionType: 1
+      requiredQuest: {fileID: 0}
+      requiredStatus: 0
+      requiredItems:
+      - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
+      - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
+      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      requiredItemCount: 1
+      itemLogic: 1
+      requiredMoney: 0
+    showAsDisabledIfNotMet: 1
+    results:
+    - resultType: 3
+      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
+      itemsToTake:
+      - {fileID: 11400000, guid: 241c8831b01bcbf47872634be4d4ffde, type: 2}
+      - {fileID: 11400000, guid: ac20843fdbde92742b564266474dfb9c, type: 2}
+      - {fileID: 11400000, guid: 697e9f7292860ff428b550b33f782401, type: 2}
+      itemCountToTake: 1
+      itemTakeLogic: 1
+      moneyToTake: 0
+  - choiceText: "Sorry, I don\u2019t have it yet."
     actionType: 0
     nextDialogue: {fileID: 0}
     conditions: []
-    results:
-    - resultType: 1
-      targetQuest: {fileID: 11400000, guid: 8b1cfc84ba9fe414096a997563cf160c, type: 2}
-  - choiceText: Not my problem.
-    actionType: 3
-    nextDialogue: {fileID: 11400000, guid: 8d5c7e8dc4d4e6740a23bf41415d04e7, type: 2}
-    conditions: []
+    showAsDisabledIfNotMet: 0
     results: []
